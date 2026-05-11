@@ -1,0 +1,69 @@
+{
+  "questions": [
+    {
+      "id": "java-035",
+      "date": "2026-05-07",
+      "title": "ForkJoinPool 适合什么类型任务？",
+      "prompt": "work-stealing 直觉是什么？",
+      "answer": "适合可递归拆分、CPU 密集且可并行的小任务；空闲线程可从其他队列窃取任务提高利用率。",
+      "tags": [
+        "中级",
+        "JVM",
+        "并发",
+        "算法"
+      ]
+    },
+    {
+      "id": "java-034",
+      "date": "2026-05-07",
+      "title": "ThreadPoolExecutor 常见拒绝策略有哪些？",
+      "prompt": "线上一般怎么选？",
+      "answer": "Abort/CallerRuns/Discard/DiscardOldest 等；线上常结合监控与降级：宁可明确失败也不要无声丢任务（视业务而定）。",
+      "tags": [
+        "中级",
+        "JVM",
+        "业务",
+        "架构"
+      ]
+    },
+    {
+      "id": "java-033",
+      "date": "2026-05-07",
+      "title": "线程池 core/max/queue 参数如何理解？",
+      "prompt": "提交任务时大致怎么走？",
+      "answer": "core 为核心线程数，max 为上限，队列缓冲任务；提交策略通常是核心→队列→扩容到 max→拒绝策略（实现细节依 ThreadPoolExecutor）。",
+      "tags": [
+        "中级",
+        "JVM",
+        "并发",
+        "架构"
+      ]
+    },
+    {
+      "id": "java-032",
+      "date": "2026-05-07",
+      "title": "ThreadLocal 的原理直觉是什么？",
+      "prompt": "为何可能导致内存泄漏？",
+      "answer": "每个线程维护 ThreadLocalMap，ThreadLocal 作为弱引用 key（具体细节依实现）；线程池场景若不及时 remove，值可能长期存活造成泄漏。",
+      "tags": [
+        "中级",
+        "JVM",
+        "并发",
+        "业务"
+      ]
+    },
+    {
+      "id": "java-031",
+      "date": "2026-05-07",
+      "title": "Semaphore、CountDownLatch、CyclicBarrier 各自典型用法是什么？",
+      "prompt": "各举一个场景。",
+      "answer": "Semaphore 控制并发许可数；CountDownLatch 一次性等待多个任务完成；CyclicBarrier 让一组线程周期性会合再继续。",
+      "tags": [
+        "中级",
+        "JVM",
+        "并发",
+        "业务"
+      ]
+    }
+  ]
+}

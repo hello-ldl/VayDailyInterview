@@ -1,0 +1,69 @@
+{
+  "questions": [
+    {
+      "id": "java-080",
+      "date": "2026-05-16",
+      "title": "常见限流算法有哪些？",
+      "prompt": "各适合什么场景？",
+      "answer": "令牌桶、漏桶、固定/滑动窗口； burst 平滑度与实现成本不同，网关层与单机层可分层实现。",
+      "tags": [
+        "中级",
+        "JVM",
+        "架构",
+        "算法"
+      ]
+    },
+    {
+      "id": "java-079",
+      "date": "2026-05-16",
+      "title": "JWT 由哪些部分组成？",
+      "prompt": "客户端保存 JWT 的主要风险是什么？",
+      "answer": "Header.Payload.Signature；风险包含 XSS 窃取、无法服务端即时撤回（需配合短有效期与刷新机制/黑名单）。",
+      "tags": [
+        "中级",
+        "JVM",
+        "系统设计",
+        "业务"
+      ]
+    },
+    {
+      "id": "java-078",
+      "date": "2026-05-16",
+      "title": "REST 接口如何实现幂等？",
+      "prompt": "POST 为什么天然不幂等？",
+      "answer": "幂等重复执行结果一致：常用 PUT 用资源版本、DELETE 多次删除仍一致；POST 创建资源多次可能生成多条记录，需要业务令牌等机制。",
+      "tags": [
+        "高级",
+        "JVM",
+        "业务",
+        "系统设计"
+      ]
+    },
+    {
+      "id": "java-077",
+      "date": "2026-05-16",
+      "title": "Spring Starter 带来了什么开发体验提升？",
+      "prompt": "依赖治理要注意什么？",
+      "answer": "把常用能力打包为依赖组合与默认配置；需注意版本对齐、传递依赖冲突与最小依赖原则。",
+      "tags": [
+        "初级",
+        "Spring",
+        "架构",
+        "业务"
+      ]
+    },
+    {
+      "id": "java-076",
+      "date": "2026-05-16",
+      "title": "Spring Boot 自动配置大致如何实现？",
+      "prompt": "@EnableAutoConfiguration 的意义？",
+      "answer": "通过条件注解与 META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports 等机制按需装配；减少样板配置。",
+      "tags": [
+        "中级",
+        "Spring",
+        "架构",
+        "系统设计"
+      ]
+    }
+  ]
+}

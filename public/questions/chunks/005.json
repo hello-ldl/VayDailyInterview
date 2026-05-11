@@ -1,0 +1,69 @@
+{
+  "questions": [
+    {
+      "id": "java-075",
+      "date": "2026-05-15",
+      "title": "描述 Spring MVC 一次请求的大致处理链。",
+      "prompt": "DispatcherServlet 角色是什么？",
+      "answer": "DispatcherServlet 调度映射、拦截器、参数解析、调用控制器、视图解析/消息转换并返回响应。",
+      "tags": [
+        "中级",
+        "Spring",
+        "架构",
+        "基础知识"
+      ]
+    },
+    {
+      "id": "java-074",
+      "date": "2026-05-15",
+      "title": "哪些情况会导致 @Transactional 失效？",
+      "prompt": "举三个例子。",
+      "answer": "非 public、自调用、异常类型不匹配默认回滚规则、线程切换丢失事务上下文等；本质要确保走代理且rollbackFor 配置正确。",
+      "tags": [
+        "高级",
+        "Spring",
+        "业务",
+        "架构"
+      ]
+    },
+    {
+      "id": "java-073",
+      "date": "2026-05-15",
+      "title": "Spring 如何解决循环依赖（singleton）？",
+      "prompt": "三级缓存直觉是什么？",
+      "answer": "通过提前暴露早期引用允许注入；本质是打破构造期闭环（prototype 或构造器注入仍可能失败）。",
+      "tags": [
+        "高级",
+        "Spring",
+        "架构",
+        "系统设计"
+      ]
+    },
+    {
+      "id": "java-072",
+      "date": "2026-05-15",
+      "title": "Spring AOP 代理是如何产生的？",
+      "prompt": "同类内自调用为何可能失效？",
+      "answer": "JDK/CGLIB 代理在运行时织入；自调用绕开代理对象导致切面不生效，可通过注入自身代理或拆 Bean 等方式处理。",
+      "tags": [
+        "高级",
+        "Spring",
+        "架构",
+        "业务"
+      ]
+    },
+    {
+      "id": "java-071",
+      "date": "2026-05-15",
+      "title": "Spring Bean 生命周期关键扩展点有哪些？",
+      "prompt": "初始化与销毁常见回调？",
+      "answer": "Aware 接口、BeanPostProcessor、@PostConstruct/@PreDestroy、InitializingBean 等；用于装配校验与资源释放。",
+      "tags": [
+        "高级",
+        "Spring",
+        "架构",
+        "基础知识"
+      ]
+    }
+  ]
+}
