@@ -12,6 +12,7 @@ import type {
   QuestionCatalogMeta,
   QuestionsChunkFile,
 } from '../types/question'
+import { questionsCatalogUrl } from '../lib/questionsCatalogUrl'
 import {
   QuestionsContext,
   type QuestionsContextValue,
@@ -33,7 +34,7 @@ function normalizeQuestions(raw: unknown): InterviewQuestion[] {
 }
 
 async function fetchMeta(): Promise<QuestionCatalogMeta> {
-  const res = await fetch('/questions/meta.json', { cache: 'no-store' })
+  const res = await fetch(questionsCatalogUrl('meta.json'), { cache: 'no-store' })
   if (!res.ok) throw new Error(`加载题库索引失败 (${res.status})`)
   const meta = (await res.json()) as QuestionCatalogMeta
   if (
@@ -93,7 +94,7 @@ export function QuestionsProvider({ children }: { children: ReactNode }) {
       const desc = m.chunks[chunkIndex]
       if (!desc) throw new Error(`缺少分块描述：${chunkIndex}`)
 
-      const res = await fetch(`/questions/${desc.path}`, { cache: 'no-store' })
+      const res = await fetch(questionsCatalogUrl(desc.path), { cache: 'no-store' })
       if (!res.ok) throw new Error(`加载题目分块失败 (${res.status})`)
 
       const qs = normalizeQuestions(await res.json())
