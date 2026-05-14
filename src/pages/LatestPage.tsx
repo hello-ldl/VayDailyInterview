@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { IncrementalQuestionList } from '../components/IncrementalQuestionList'
-import { chunkQuestions } from '../lib/questionOrder'
+import { useEffect, useState } from 'react'
+import { QuestionCard } from '../components/QuestionCard'
 import type { InterviewQuestion, QuestionCatalogMeta } from '../types/question'
 import { useQuestions } from '../hooks/useQuestions'
 
@@ -9,37 +8,35 @@ type StreamProps = {
   loadChunk: (chunkIndex: number) => Promise<InterviewQuestion[]>
 }
 
+function parseChunkDate(path: string): string | null {
+  const match = path.match(/(\d{4}-\d{2}-\d{2})\.json$/)
+  return match ? match[1] : null
+}
+
 function LatestQuestionStream({ meta, loadChunk }: StreamProps) {
-  const [latestList, setLatestList] = useState<InterviewQuestion[] | undefined>(
-    undefined,
-  )
+  const [dayQuestions, setDayQuestions] = useState<InterviewQuestion[] | null>(null)
   const [streamError, setStreamError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  const selectedDate = parseChunkDate(meta.chunks[0]?.path) ?? meta.latestDate
 
   useEffect(() => {
     let cancelled = false
+    setLoading(true)
+    setStreamError(null)
+    setDayQuestions(null)
+
     void (async () => {
       try {
-        const target = meta.latestDate
-        if (!target) {
-          return
+        const questions = await loadChunk(0)
+        if (!cancelled) {
+          setDayQuestions(questions)
+          setLoading(false)
         }
-        const out: InterviewQuestion[] = []
-        for (let ci = 0; ci < meta.chunkCount; ci++) {
-          const qs = await loadChunk(ci)
-          if (cancelled) return
-          for (const q of qs) {
-            if (q.date === target) out.push(q)
-            else if (q.date < target) {
-              if (!cancelled) setLatestList(out)
-              return
-            }
-          }
-        }
-        if (!cancelled) setLatestList(out)
       } catch (e) {
         if (!cancelled) {
           setStreamError(e instanceof Error ? e.message : '加载失败')
-          setLatestList([])
+          setLoading(false)
         }
       }
     })()
@@ -47,37 +44,18 @@ function LatestQuestionStream({ meta, loadChunk }: StreamProps) {
     return () => {
       cancelled = true
     }
-  }, [meta, loadChunk])
-
-  const batches = useMemo(() => {
-    if (!latestList) return []
-    return chunkQuestions(latestList, meta.chunkSize)
-  }, [latestList, meta.chunkSize])
-
-  const loadBatch = useCallback(
-    async (batchIndex: number) => batches[batchIndex] ?? [],
-    [batches],
-  )
+  }, [loadChunk])
 
   if (streamError) {
     return (
       <div className="page-state page-state--error">
-        <p>读取最新题目失败：{streamError}</p>
+        <p>读取题目失败：{streamError}</p>
       </div>
     )
   }
 
-  if (latestList === undefined) {
-    return <p className="page-state">加载最新题目中…</p>
-  }
-
-  if (!latestList.length) {
-    return (
-      <div className="page-empty">
-        <h1 className="page-title">最新题目</h1>
-        <p className="page-lead">当前没有在索引日期下找到题目。</p>
-      </div>
-    )
+  if (loading || !dayQuestions) {
+    return <p className="page-state">加载题目中…</p>
   }
 
   return (
@@ -86,16 +64,15 @@ function LatestQuestionStream({ meta, loadChunk }: StreamProps) {
         <p className="page__eyebrow">Latest</p>
         <h1 className="page-title">最新发布</h1>
         <p className="page-lead">
-          当前批次日期：<strong>{meta.latestDate}</strong>，共 {latestList.length}{' '}
-          题。默认每次展开 {meta.chunkSize} 题；下一批会在后台预加载并在 DOM 中待命。
+          当前显示日期：<strong>{selectedDate}</strong>，共 {dayQuestions.length} 题。
         </p>
       </header>
 
-      <IncrementalQuestionList
-        key={`${meta.latestDate}:${latestList.length}:${batches.length}`}
-        totalBatches={batches.length}
-        loadBatch={loadBatch}
-      />
+      <div className="stack">
+        {dayQuestions.map((question) => (
+          <QuestionCard key={question.id} question={question} />
+        ))}
+      </div>
     </>
   )
 }
@@ -143,11 +120,7 @@ export function LatestPage() {
 
   return (
     <div className="page">
-      <LatestQuestionStream
-        key={`${meta.latestDate}:${meta.chunkCount}:${meta.totalQuestions}`}
-        meta={meta}
-        loadChunk={loadChunk}
-      />
+      <LatestQuestionStream meta={meta} loadChunk={loadChunk} />
     </div>
   )
 }

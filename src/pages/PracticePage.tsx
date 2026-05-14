@@ -132,9 +132,6 @@ export function PracticePage() {
       <header className="page__intro">
         <p className="page__eyebrow">Practice</p>
         <h1 className="page-title">刷题</h1>
-        <p className="page-lead">
-          按全局题号随机打乱；每次只加载当前题目所在分块，避免一次性拉取整个题库。
-        </p>
       </header>
 
       <PracticeSession

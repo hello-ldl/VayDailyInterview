@@ -27,10 +27,7 @@ export function Layout() {
         <Outlet />
       </main>
       <footer className="layout__footer">
-        <p className="layout__footer-note">
-          题库索引：<code className="inline-code">/questions/meta.json</code>；题目分块：
-          <code className="inline-code">/questions/chunks/*.json</code>
-        </p>
+        <p className="layout__footer-note">© 2026 每日面试</p>
       </footer>
     </div>
   )

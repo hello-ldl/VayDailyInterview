@@ -39,9 +39,6 @@ export function HistoryPage() {
       <header className="page__intro">
         <p className="page__eyebrow">Archive</p>
         <h1 className="page-title">历史题目</h1>
-        <p className="page-lead">
-          按发布时间从新到旧；每次展示 {meta.chunkSize} 题，支持预加载下一批以获得更顺滑的展开体验。
-        </p>
       </header>
 
       <IncrementalQuestionList
