@@ -3,6 +3,34 @@
 ## 目的
 这个文档用于让 AI 大模型快速理解项目结构和当前需求，自动新增每日面试题库，并保持页面展示逻辑正常。
 
+## 项目操作手册
+
+### 本地开发
+
+1. 安装依赖
+
+```bash
+npm install
+```
+
+2. 启动开发服务器
+
+```bash
+npm run dev
+```
+
+3. 生产构建
+
+```bash
+npm run build
+```
+
+4. 预览构建结果
+
+```bash
+npm run preview
+```
+
 ## 任务概述
 - 项目已经提交并推送到 GitHub。
 - 需要新增每日面试题库数据，数据保存在 `public/questions/` 下。
@@ -63,13 +91,33 @@
 4. 运行构建验证：
    - `npm run build`
 
-## 提交与发布
-如果需要 AI 直接提交并发布：
-1. `git add -A`
-2. `git commit -m "chore: add daily interview question data"`
-3. `git push origin main`
+## 已有报告与脚本
 
-> 如果仓库已配置 GitHub Pages，一旦推送到 `main` 分支，GitHub Pages 应会自动发布。
+- `public/questions/answer-lengths-by-date.md`：按日期列出每题答案长度的表格。
+- `public/questions/answer-lengths-summary-by-date.md`：按日期汇总题目数量、最小/最大/平均答案长度。
+- `public/questions/answer-lengths.json`：所有题目答案长度统计数据。
+- `scripts/`：包含生成与修复题库数据的脚本。
+
+## 提交与发布
+1. 暂存更改
+
+```bash
+git add -A
+```
+
+2. 提交更改
+
+```bash
+git commit -m "chore: update question bank and operation docs"
+```
+
+3. 推送到远程仓库
+
+```bash
+git push origin main
+```
+
+> 如果仓库已经配置 GitHub Pages，推送后即可触发自动发布。
 
 ## 备注
 - 不要修改页面组件中的默认展示逻辑。
