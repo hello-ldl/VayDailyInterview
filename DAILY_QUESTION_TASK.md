@@ -28,7 +28,7 @@
     - `date`: ISO 日期 `YYYY-MM-DD`
     - `title`: 题目标题
     - `prompt`: 题目补充说明
-    - `answer`: 标准答案文本
+    - `answer`: 标准答案文本，详细回答问题，不能为空或者是只阐述标题
     - `tags?`: 可选标签数组
 
 - `src/pages/LatestPage.tsx`
