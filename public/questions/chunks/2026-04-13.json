@@ -5,7 +5,7 @@
       "date": "2026-04-13",
       "title": "ThreadLocal 的常见误区有哪些？",
       "prompt": "实际应用中要避免什么？",
-      "answer": "为每个线程提供独立变量副本，避免共享状态冲突；要注意及时 remove 以避免线程池环境的内存泄漏。 错误理解会导致不可预期的并发问题或性能退化。",
+      "answer": "技术问题：ThreadLocal 的常见误区有哪些？\n\n详细解答：\n\n并发相关问题通常要求理解同步原语、线程调度和状态管理。 AQS 是一个抽象队列同步器，通过 state 字段和等待队列统一封装锁与同步器实现，很多并发组件如 ReentrantLock、Semaphore、CountDownLatch、CyclicBarrier 都基于它构建。 CAS 是一种无锁原语，通过比较并交换实现原子更新，但需要小心 ABA 问题，可以通过版本号、Stamp 或更复杂的数据结构避免。 Condition.await/signal 解决了线程在条件不满足时的等待唤醒问题，相比 Object.wait/notify 它支持多个条件队列、精细唤醒和更清晰的代码结构。\n\n针对提问“实际应用中要避免什么？”，针对“实际应用中要避免什么？”，这意味着应当关注该问题的核心差异、权衡点和实际可操作建议。",
       "tags": [
         "中级",
         "Java",
@@ -17,7 +17,7 @@
       "date": "2026-04-13",
       "title": "何时应该优先使用 ThreadLocal？",
       "prompt": "它最适合解决什么问题？",
-      "answer": "为每个线程提供独立变量副本，避免共享状态冲突；要注意及时 remove 以避免线程池环境的内存泄漏。 这通常在实际场景中体现为架构或代码级的显式选择。",
+      "answer": "技术问题：何时应该优先使用 ThreadLocal？\n\n详细解答：\n\n并发相关问题通常要求理解同步原语、线程调度和状态管理。 AQS 是一个抽象队列同步器，通过 state 字段和等待队列统一封装锁与同步器实现，很多并发组件如 ReentrantLock、Semaphore、CountDownLatch、CyclicBarrier 都基于它构建。 CAS 是一种无锁原语，通过比较并交换实现原子更新，但需要小心 ABA 问题，可以通过版本号、Stamp 或更复杂的数据结构避免。 Condition.await/signal 解决了线程在条件不满足时的等待唤醒问题，相比 Object.wait/notify 它支持多个条件队列、精细唤醒和更清晰的代码结构。\n\n针对提问“它最适合解决什么问题？”，针对“它最适合解决什么问题？”，这意味着应当关注该问题的核心差异、权衡点和实际可操作建议。",
       "tags": [
         "中级",
         "Java",
@@ -29,7 +29,7 @@
       "date": "2026-04-13",
       "title": "ThreadLocal 的核心是什么？",
       "prompt": "为什么它对系统稳定性很重要？",
-      "answer": "为每个线程提供独立变量副本，避免共享状态冲突；要注意及时 remove 以避免线程池环境的内存泄漏。 它是理解后续优化与错误诊断的关键。",
+      "answer": "技术问题：ThreadLocal 的核心是什么？\n\n详细解答：\n\n并发相关问题通常要求理解同步原语、线程调度和状态管理。 AQS 是一个抽象队列同步器，通过 state 字段和等待队列统一封装锁与同步器实现，很多并发组件如 ReentrantLock、Semaphore、CountDownLatch、CyclicBarrier 都基于它构建。 CAS 是一种无锁原语，通过比较并交换实现原子更新，但需要小心 ABA 问题，可以通过版本号、Stamp 或更复杂的数据结构避免。 Condition.await/signal 解决了线程在条件不满足时的等待唤醒问题，相比 Object.wait/notify 它支持多个条件队列、精细唤醒和更清晰的代码结构。\n\n针对提问“为什么它对系统稳定性很重要？”，针对“为什么它对系统稳定性很重要？”，这意味着应当关注该问题的核心差异、权衡点和实际可操作建议。",
       "tags": [
         "中级",
         "Java",
@@ -41,7 +41,7 @@
       "date": "2026-04-13",
       "title": "synchronized 与 ReentrantLock 与 不同锁实现 的区别是什么？",
       "prompt": "如何在两者间做取舍？",
-      "answer": "synchronized 是 JVM 内置锁，语法简单；ReentrantLock 提供可中断、超时与公平策略，适合更复杂的同步需求。 需要结合具体业务和实现来选型，不要盲目套用。",
+      "answer": "针对并发编程问题：synchronized 与 ReentrantLock 与 不同锁实现 的区别是什么？\n\n详细解答：\n\nJava中synchronized关键字和ReentrantLock是两种主要的锁实现机制。\n\n**synchronized关键字的特点：**\n- 语法层面：Java语言内置的关键字，无需显式获取和释放锁\n- 自动管理：JVM自动管理锁的获取和释放\n- 不可中断：一旦获取锁，线程无法被中断\n- 条件等待：只能通过wait()/notify()机制\n\n**ReentrantLock的特点：**\n- API层面：java.util.concurrent.locks包中的类\n- 手动管理：需要显式调用lock()和unlock()\n- 可中断：支持lockInterruptibly()方法允许线程中断\n- 条件等待：支持多个Condition对象，实现更灵活的等待通知\n- 公平性：可以选择公平锁或非公平锁\n- 超时机制：支持tryLock()和tryLock(long, TimeUnit)\n\n**如何在两者间做取舍？**\n选择标准：\n- 简单场景：优先使用synchronized，代码简洁\n- 复杂场景：需要可中断、超时、公平性时使用ReentrantLock\n- 性能敏感：考虑StampedLock的乐观读策略\n\n两种锁实现都是可重入的，都支持同一个线程多次获取同一把锁。",
       "tags": [
         "中级",
         "Java",
@@ -53,7 +53,7 @@
       "date": "2026-04-13",
       "title": "synchronized 与 ReentrantLock 的常见误区有哪些？",
       "prompt": "实际应用中要避免什么？",
-      "answer": "synchronized 是 JVM 内置锁，语法简单；ReentrantLock 提供可中断、超时与公平策略，适合更复杂的同步需求。 错误理解会导致不可预期的并发问题或性能退化。",
+      "answer": "针对并发编程问题：synchronized 与 ReentrantLock 的常见误区有哪些？\n\n详细解答：\n\nJava中synchronized关键字和ReentrantLock是两种主要的锁实现机制。\n\n**synchronized关键字的特点：**\n- 语法层面：Java语言内置的关键字，无需显式获取和释放锁\n- 自动管理：JVM自动管理锁的获取和释放\n- 不可中断：一旦获取锁，线程无法被中断\n- 条件等待：只能通过wait()/notify()机制\n\n**ReentrantLock的特点：**\n- API层面：java.util.concurrent.locks包中的类\n- 手动管理：需要显式调用lock()和unlock()\n- 可中断：支持lockInterruptibly()方法允许线程中断\n- 条件等待：支持多个Condition对象，实现更灵活的等待通知\n- 公平性：可以选择公平锁或非公平锁\n- 超时机制：支持tryLock()和tryLock(long, TimeUnit)\n\n**实际应用中要避免什么？**\n选择标准：\n- 简单场景：优先使用synchronized，代码简洁\n- 复杂场景：需要可中断、超时、公平性时使用ReentrantLock\n- 性能敏感：考虑StampedLock的乐观读策略\n\n两种锁实现都是可重入的，都支持同一个线程多次获取同一把锁。",
       "tags": [
         "中级",
         "Java",

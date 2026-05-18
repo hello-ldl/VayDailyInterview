@@ -5,7 +5,7 @@
       "date": "2026-03-30",
       "title": "Comparable 与 Comparator 区别是什么？",
       "prompt": "何时用哪个？",
-      "answer": "Comparable 是自然排序（元素自身实现）；Comparator 是外部比较器；第三方类或多种排序策略更适合 Comparator。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。",
+      "answer": "技术问题：Comparable 与 Comparator 区别是什么？\n\n详细解答：\n\nComparable和Comparator都是Java中用于对象比较的接口，它们解决了不同场景下的排序需求，但设计理念和使用方式有显著差异。\n\n**Comparable 接口：**\n\n**1. 定义**\n- java.lang.Comparable<T> 接口\n- 只有一个方法：int compareTo(T o)\n- 返回负数、零、正数表示小于、等于、大于\n\n**2. 特点**\n- **自然排序**：定义对象自身的\"自然\"排序规则\n- **侵入式**：需要修改类本身，实现compareTo方法\n- **单一性**：每个类只能有一种自然排序\n- **继承性**：子类继承父类的比较规则\n\n**3. 使用场景**\n- String、Integer等基础类型\n- 自定义类的默认排序\n- TreeSet、TreeMap的key排序\n\n**Comparator 接口：**\n\n**1. 定义**\n- java.util.Comparator<T> 接口\n- 核心方法：int compare(T o1, T o2)\n- 还提供default方法：reversed()、thenComparing()等\n\n**2. 特点**\n- **外部排序**：排序逻辑独立于对象类\n- **非侵入式**：不需要修改被比较的类\n- **多样性**：可以有多种不同的比较器\n- **组合性**：支持比较器的组合和链式调用\n\n**3. 使用场景**\n- 业务排序规则多样化\n- 第三方类的排序需求\n- 运行时动态排序策略\n\n**何时用哪个？**\n\n**选择Comparable的情况：**\n- 类有明显的\"自然\"排序（如数字、日期、字符串）\n- 类设计时就能确定排序规则\n- 主要用作TreeSet/TreeMap的元素或键\n- API设计者希望提供默认排序\n\n**选择Comparator的情况：**\n- 排序规则多样，可能需要多种排序方式\n- 类不可修改（如第三方库的类）\n- 运行时需要动态改变排序策略\n- 需要组合多个排序条件\n\n**实际应用对比：**\n\n```java\n// Comparable：类自身定义排序\npublic class Employee implements Comparable<Employee> {\n    private String name;\n    private int salary;\n    \n    @Override\n    public int compareTo(Employee other) {\n        return Integer.compare(this.salary, other.salary);\n    }\n}\n\n// Comparator：外部定义排序策略\npublic class EmployeeComparators {\n    public static Comparator<Employee> byName() {\n        return Comparator.comparing(Employee::getName);\n    }\n    \n    public static Comparator<Employee> bySalary() {\n        return Comparator.comparingInt(Employee::getSalary);\n    }\n    \n    public static Comparator<Employee> byNameThenSalary() {\n        return Comparator.comparing(Employee::getName)\n                        .thenComparingInt(Employee::getSalary);\n    }\n}\n```\n\n**设计原则建议：**\n- **优先使用Comparable**：当类有明显的自然排序时\n- **使用Comparator**：当需要灵活的排序策略时\n- **组合使用**：Comparable提供默认排序，Comparator提供额外选项\n- **函数式编程**：JDK8+优先使用Comparator的静态方法\n\nComparable定义对象的内在排序规则，而Comparator提供外部的比较策略，两者相辅相成，满足不同的排序需求。",
       "tags": [
         "初级",
         "JVM",
@@ -18,7 +18,7 @@
       "date": "2026-03-30",
       "title": "equals 与 hashCode 需要满足哪些契约？",
       "prompt": "违反会发生什么？",
-      "answer": "相等对象必须 hash 一致；重写 equals 通常必须重写 hashCode；否则在哈希容器中行为异常。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。",
+      "answer": "技术问题：equals 与 hashCode 需要满足哪些契约？\n\n详细解答：\n\nequals()和hashCode()是Object类的重要方法，它们在集合类（如HashMap、HashSet）中扮演关键角色，必须遵守特定的契约关系。\n\n**equals 方法的契约：**\n\n**1. 自反性（Reflexive）**\n- x.equals(x) 必须返回true\n- 对象必须等于自身\n\n**2. 对称性（Symmetric）**\n- x.equals(y) 返回true，则y.equals(x)也必须返回true\n- 等价关系必须是对称的\n\n**3. 传递性（Transitive）**\n- 如果x.equals(y)=true且y.equals(z)=true，则x.equals(z)必须为true\n- 等价关系必须是传递的\n\n**4. 一致性（Consistent）**\n- 多次调用x.equals(y)结果必须一致（前提是对象状态未改变）\n- equals比较结果应该是稳定的\n\n**5. 非空性（Non-nullity）**\n- x.equals(null) 必须返回false\n- 任何对象都不等于null\n\n**hashCode 方法的契约：**\n\n**1. 一致性（Consistent）**\n- 多次调用hashCode()结果必须相同（前提是equals比较中使用的信息未改变）\n- 同一个对象的hashCode在一次执行中必须保持一致\n\n**2. equals一致性（equals-hashCode Consistency）**\n- 如果x.equals(y)=true，则x.hashCode()必须等于y.hashCode()\n- 相等的对象必须有相同的hashCode\n- 注意：hashCode相等不意味着equals一定为true（哈希冲突）\n\n**违反会发生什么？**\n\n**违反equals契约的后果：**\n\n1. **破坏集合类行为**\n   - HashSet可能出现重复元素\n   - HashMap的containsKey可能失败\n   - 违反直觉的数据结构行为\n\n2. **破坏业务逻辑**\n   - 对象比较结果不可预测\n   - 可能导致业务逻辑错误\n\n**违反hashCode契约的后果：**\n\n1. **HashMap/HashSet行为异常**\n   - 无法正确查找已存储的对象\n   - 同一个对象可能在集合中出现多次\n   - 违反了集合类的基本契约\n\n2. **性能问题**\n   - 哈希冲突增加，查找性能下降\n   - 可能导致HashMap退化为链表\n\n**3. 缓存和序列化问题**\n   - 基于hashCode的缓存可能失效\n   - 序列化/反序列化后对象行为异常\n\n**正确实现示例：**\n\n```java\npublic class Person {\n    private String name;\n    private int age;\n    \n    @Override\n    public boolean equals(Object obj) {\n        if (this == obj) return true;\n        if (!(obj instanceof Person)) return false;\n        Person person = (Person) obj;\n        return age == person.age && \n               Objects.equals(name, person.name);\n    }\n    \n    @Override\n    public int hashCode() {\n        return Objects.hash(name, age);\n    }\n}\n```\n\n**实现最佳实践：**\n- 使用Objects.equals()和Objects.hash()工具方法\n- 确保equals和hashCode使用相同的字段\n- 对于可变对象，hashCode不应依赖可变状态\n- 优先使用IDE生成equals和hashCode方法\n\nequals和hashCode的正确实现是Java对象模型的基础，违反契约会导致严重的运行时问题。",
       "tags": [
         "初级",
         "JVM",
@@ -31,7 +31,7 @@
       "date": "2026-03-30",
       "title": "TreeMap 与 HashMap 如何选择？",
       "prompt": "时间与有序性 trade-off？",
-      "answer": "TreeMap 基于红黑树按键排序或自定义 Comparator；需要有序遍历/区间操作时更合适；否则 HashMap 平均查找更友好。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。",
+      "answer": "技术问题：TreeMap 与 HashMap 如何选择？\n\n详细解答：\n\nTreeMap和HashMap都是Map接口的实现，但它们在数据结构、性能特点和使用场景上有显著差异，选择时需要根据具体需求权衡。\n\n**数据结构对比：**\n\n**1. HashMap**\n- **底层结构**：哈希表 + 链表/红黑树（JDK8+）\n- **查找原理**：通过hashCode计算桶位置，O(1)平均时间复杂度\n- **优点**：查找速度快，适合大量随机访问\n- **缺点**：无序存储，空间利用率取决于负载因子\n\n**2. TreeMap**\n- **底层结构**：红黑树（自平衡二叉搜索树）\n- **查找原理**：通过比较器维护有序性，O(log n)时间复杂度\n- **优点**：元素自动排序，支持范围查询\n- **缺点**：插入/删除操作相对较慢\n\n**性能对比：**\n\n| 操作 | HashMap | TreeMap |\n|------|---------|---------|\n| 查找 | O(1) | O(log n) |\n| 插入 | O(1) | O(log n) |\n| 删除 | O(1) | O(log n) |\n| 范围查询 | O(n) | O(log n + k) |\n\n**时间与有序性 trade-off？**\n\n**核心权衡点：**\n\n1. **时间复杂度 vs 有序性**\n   - HashMap：牺牲有序性，换取最快的访问速度\n   - TreeMap：牺牲部分性能，获得天然的有序性\n\n2. **内存开销**\n   - HashMap：需要维护哈希表，可能有空桶浪费\n   - TreeMap：每个节点需要额外的树结构指针\n\n3. **操作稳定性**\n   - HashMap：性能相对稳定，不受数据分布影响\n   - TreeMap：最坏情况仍保证O(log n)，但可能退化\n\n**选择建议：**\n\n**选择HashMap的场景：**\n- 需要频繁随机访问的场景\n- 对顺序没有要求的缓存\n- 内存敏感，追求极致性能\n- 键的hashCode分布良好\n\n**选择TreeMap的场景：**\n- 需要保持键有序的场景\n- 频繁进行范围查询（subMap、headMap、tailMap）\n- 作为排序队列使用\n- 需要有序遍历的场景\n\n**实际应用案例：**\n- **HashMap**：用户会话缓存、配置参数存储、ID映射表\n- **TreeMap**：时间序列数据、排行榜、范围统计、索引结构\n\n**性能优化建议：**\n- 如果需要有序且性能敏感，考虑LinkedHashMap\n- 对于并发场景，优先使用ConcurrentHashMap\n- 内存紧张时，可以调整HashMap的负载因子\n\n选择时应该基于实际的访问模式和性能需求，HashMap适合随机访问密集的场景，而TreeMap适合需要有序性和范围查询的场景。",
       "tags": [
         "初级",
         "JVM",
@@ -44,7 +44,7 @@
       "date": "2026-03-30",
       "title": "LinkedHashMap 为何能实现 LRU 直觉？",
       "prompt": "accessOrder 有什么用？",
-      "answer": "在哈希结构外维护双向链表顺序；accessOrder=true 时访问会更新顺序，可配合 removeEldestEntry 实现缓存淘汰策略。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。",
+      "answer": "技术问题：LinkedHashMap 为何能实现 LRU 直觉？\n\n详细解答：\n\nLinkedHashMap是HashMap的有序版本，通过双向链表维护元素的插入顺序或访问顺序，从而能够实现LRU缓存淘汰策略。\n\n**LinkedHashMap 的数据结构：**\n\n**1. 继承关系**\n- 继承自HashMap，拥有HashMap的所有特性\n- 新增双向链表维护元素顺序\n- Entry节点包含before/after指针\n\n**2. 两种顺序模式**\n- **插入顺序**：accessOrder=false（默认），按put顺序维护\n- **访问顺序**：accessOrder=true，按get/put访问顺序维护\n\n**3. LRU实现原理**\n- 当accessOrder=true时，每次访问元素会将其移到链表尾部\n- 链表头部始终是最久未访问的元素\n- 超出容量时，移除头部元素实现LRU淘汰\n\n**LinkedHashMap 实现LRU的机制：**\n\n1. **访问时重排序**\n   - get()操作：将访问元素移到链表尾部\n   - put()操作：如果key存在，也会重排序\n   - 保持最近访问的元素在链表末尾\n\n2. **容量控制**\n   - 重写removeEldestEntry()方法\n   - 返回true时自动移除最老元素\n   - 实现固定大小的LRU缓存\n\n3. **线程安全考虑**\n   - LinkedHashMap本身非线程安全\n   - 并发场景需要Collections.synchronizedMap()包装\n\n**accessOrder 有什么用？**\n\n**accessOrder 参数的作用：**\n\n1. **false（默认）：插入顺序**\n   - 维护元素的插入顺序\n   - 适合需要保持添加顺序的场景\n   - 迭代时按添加时间排序\n\n2. **true：访问顺序**\n   - 维护元素的访问顺序\n   - 最近访问的元素在链表末尾\n   - 最久未访问的元素在链表头部\n   - 实现LRU缓存的基础\n\n**LRU缓存实现示例：**\n\n```java\nclass LRUCache<K, V> extends LinkedHashMap<K, V> {\n    private int capacity;\n    \n    public LRUCache(int capacity) {\n        super(capacity, 0.75f, true); // accessOrder=true\n        this.capacity = capacity;\n    }\n    \n    @Override\n    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {\n        return size() > capacity; // 超出容量时移除最老元素\n    }\n}\n```\n\n**适用场景：**\n- **LRU缓存**：热点数据缓存，淘汰冷数据\n- **会话管理**：保持活跃会话，清理超时会话\n- **资源池**：管理连接池，按使用频率淘汰\n\nLinkedHashMap通过双向链表和accessOrder参数，巧妙地实现了LRU缓存策略，是Java集合框架中的经典设计。",
       "tags": [
         "中级",
         "JVM",
@@ -57,7 +57,7 @@
       "date": "2026-03-30",
       "title": "HashMap 扩容为什么要 rehash？",
       "prompt": "并发环境下 HashMap 可能出现什么问题？",
-      "answer": "容量变化需要重新分布元素；并发 put 可能导致环形链表等问题，因此并发场景常用 ConcurrentHashMap。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。",
+      "answer": "技术问题：HashMap 扩容为什么要 rehash？\n\n详细解答：\n\n集合类的设计通常反映了数据访问模式和性能权衡。 HashMap 通过哈希表实现常数时间查找，链表和红黑树用于处理冲突。TreeMap 使用红黑树保持键有序，适合范围查询但插入成本更高。 LinkedHashMap 可以通过 accessOrder 实现 LRU 缓存策略，保持插入顺序或访问顺序。equals/hashCode 需要满足自反性、对称性、传递性和一致性，否则哈希集合行为会错乱。 Comparable 定义对象自身的排序规则，Comparator 则允许外部策略；StringBuilder 适用于单线程可变字符串构建，StringBuffer 的方法同步，适合多线程场景。\n\n针对提问“并发环境下 HashMap 可能出现什么问题？”，针对“并发环境下 HashMap 可能出现什么问题？”，这意味着应当关注该问题的核心差异、权衡点和实际可操作建议。",
       "tags": [
         "中级",
         "JVM",

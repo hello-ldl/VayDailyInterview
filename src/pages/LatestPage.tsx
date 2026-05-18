@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { QuestionCard } from '../components/QuestionCard'
 import type { InterviewQuestion, QuestionCatalogMeta } from '../types/question'
 import { useQuestions } from '../hooks/useQuestions'
@@ -17,32 +17,40 @@ function LatestQuestionStream({ meta, loadChunk }: StreamProps) {
   const [dayQuestions, setDayQuestions] = useState<InterviewQuestion[] | null>(null)
   const [streamError, setStreamError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const isLoadingRef = useRef(false)
 
   const selectedDate = parseChunkDate(meta.chunks[0]?.path) ?? meta.latestDate
 
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
+    isLoadingRef.current = true
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStreamError(null)
+     
     setDayQuestions(null)
+     
+    setLoading(true)
 
     void (async () => {
       try {
         const questions = await loadChunk(0)
-        if (!cancelled) {
+        if (!cancelled && isLoadingRef.current) {
           setDayQuestions(questions)
           setLoading(false)
+          isLoadingRef.current = false
         }
       } catch (e) {
-        if (!cancelled) {
+        if (!cancelled && isLoadingRef.current) {
           setStreamError(e instanceof Error ? e.message : '加载失败')
           setLoading(false)
+          isLoadingRef.current = false
         }
       }
     })()
 
     return () => {
       cancelled = true
+      isLoadingRef.current = false
     }
   }, [loadChunk])
 

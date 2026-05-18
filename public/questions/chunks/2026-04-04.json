@@ -5,7 +5,7 @@
       "date": "2026-04-04",
       "title": "Spring Bean 常见作用域有哪些？",
       "prompt": "singleton 与 prototype 差异？",
-      "answer": "singleton 默认单例；prototype 每次获取新实例；Web 还有 request/session 等；注意原型注入单例的生命周期陷阱。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。",
+      "answer": "针对框架相关问题：Spring Bean 常见作用域有哪些？\n\n详细解答：\n\nSpring Bean的作用域决定了Bean实例的生命周期和共享方式，不同作用域适用于不同的使用场景。\n\n**Spring Bean 的常见作用域：**\n\n**1. singleton（单例）**\n- **默认作用域**：一个Spring容器中只有一个Bean实例\n- **生命周期**：随容器创建和销毁\n- **线程安全**：需要考虑多线程访问问题\n- **适用场景**：无状态Bean、服务类、工具类\n\n**2. prototype（原型）**\n- **每次请求**：每次依赖注入都创建新实例\n- **生命周期**：由客户端管理，不受容器控制\n- **线程安全**：每个实例独立，无共享问题\n- **适用场景**：有状态Bean、每次需要独立实例\n\n**3. request（请求）**\n- **Web应用**：每个HTTP请求一个Bean实例\n- **生命周期**：请求开始到结束\n- **线程安全**：每个请求独立\n- **适用场景**：处理请求相关的状态\n\n**4. session（会话）**\n- **Web应用**：每个HTTP会话一个Bean实例\n- **生命周期**：会话创建到销毁\n- **线程安全**：会话级别隔离\n- **适用场景**：存储用户会话数据\n\n**5. application（应用）**\n- **Web应用**：整个Web应用共享一个Bean实例\n- **生命周期**：应用启动到关闭\n- **线程安全**：需要考虑并发访问\n- **适用场景**：应用级别的共享数据\n\n**6. websocket（WebSocket）**\n- **WebSocket连接**：每个WebSocket连接一个Bean实例\n- **生命周期**：连接建立到关闭\n- **适用场景**：WebSocket会话管理\n\n**singleton 与 prototype 差异？**\n\n**核心差异对比：**\n\n1. **实例管理**\n   - singleton：容器管理，共享实例\n   - prototype：每次注入新实例\n\n2. **性能开销**\n   - singleton：创建开销小，内存占用少\n   - prototype：每次创建新对象，开销较大\n\n3. **线程安全**\n   - singleton：多线程共享，需要同步\n   - prototype：实例独立，无线程安全问题\n\n4. **生命周期**\n   - singleton：容器管理完整的生命周期\n   - prototype：需要手动管理，或由使用方管理\n\n5. **依赖注入**\n   - singleton：依赖的其他Bean通常也是singleton\n   - prototype：可以注入任何作用域的Bean\n\n**作用域选择建议：**\n\n| 作用域 | 适用场景 | 示例 |\n|--------|----------|------|\n| singleton | 无状态服务、工具类 | UserService、RedisTemplate |\n| prototype | 有状态对象、原型模式 | 购物车、搜索条件 |\n| request | 请求级别数据 | 请求参数封装、临时状态 |\n| session | 用户会话数据 | 用户偏好设置、登录信息 |\n| application | 应用级别配置 | 全局缓存、系统配置 |\n\n**配置方式：**\n\n```java\n// 注解方式\n@Component\n@Scope(\"singleton\") // 默认\npublic class UserService {\n}\n\n@Component\n@Scope(\"prototype\")\npublic class ShoppingCart {\n}\n\n// XML方式\n<bean id=\"userService\" class=\"com.example.UserService\" scope=\"singleton\" />\n<bean id=\"shoppingCart\" class=\"com.example.ShoppingCart\" scope=\"prototype\" />\n```\n\n**注意事项：**\n- **singleton注入prototype**：每次都得到同一个prototype实例\n- **解决方法**：使用代理模式或方法注入\n- **性能考虑**：合理选择作用域，避免不必要的对象创建\n- **测试影响**：prototype Bean测试时需要注意状态隔离\n\n**代理模式的解决方案：**\n\n```java\n@Component\n@Scope(value = \"prototype\", proxyMode = ScopedProxyMode.TARGET_CLASS)\npublic class ShoppingCart {\n    // 每次注入都会创建新实例\n}\n```\n\nSpring Bean的作用域提供了灵活的对象管理方式，选择合适的作用域可以提高应用性能并保证线程安全。",
       "tags": [
         "中级",
         "Spring",
@@ -18,7 +18,7 @@
       "date": "2026-04-04",
       "title": "Spring IoC 与 DI 的关系是什么？",
       "prompt": "比 new 直接创建好在哪？",
-      "answer": "IoC 由容器管理生命周期与依赖关系；DI 是注入手段；利于解耦、替换实现与统一横切能力（AOP/事务）。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。",
+      "answer": "针对框架相关问题：Spring IoC 与 DI 的关系是什么？\n\n详细解答：\n\nIoC（Inversion of Control）和DI（Dependency Injection）是Spring框架的核心概念，它们共同支撑了Spring的依赖管理机制。\n\n**IoC 的核心思想：**\n\n**控制反转**：传统编程中，对象负责创建和管理依赖对象；IoC模式下，对象的依赖由外部容器管理，对象只需声明依赖即可。\n\n**1. 控制权的转移**\n- 从对象自身 → Spring容器\n- 对象不再负责依赖的创建和组装\n- 容器负责对象的生命周期管理\n\n**2. 解耦效果**\n- 降低对象间的耦合度\n- 提高代码的可测试性和可维护性\n- 支持灵活的配置和扩展\n\n**DI 的实现方式：**\n\n**依赖注入**：IoC的具体实现方式，通过构造函数、setter方法或字段注入将依赖对象注入到目标对象中。\n\n**1. 构造函数注入**\n- 在构造函数中声明依赖\n- 保证依赖在对象创建时就准备好\n- 支持不可变依赖\n\n**2. Setter注入**\n- 通过setter方法注入依赖\n- 允许可选依赖\n- 支持循环依赖（需要小心）\n\n**3. 字段注入**\n- 使用@Autowired注解直接注入\n- 代码简洁，但不利于测试\n- Spring推荐的方式\n\n**IoC 与 DI 的关系：**\n\n- **IoC是设计原则**：控制反转的思想\n- **DI是具体实现**：依赖注入的技术\n- **Spring IoC容器**：实现了IoC的框架\n- **DI是IoC的手段**：通过注入实现控制反转\n\n**比 new 直接创建好在哪？**\n\n**直接创建对象的问题：**\n\n1. **紧耦合**\n   - 对象直接依赖具体实现类\n   - 难以替换和测试\n   - 违反依赖倒置原则\n\n2. **生命周期管理复杂**\n   - 对象需要手动管理依赖的创建和销毁\n   - 资源管理容易出错\n   - 单例模式实现困难\n\n3. **配置不灵活**\n   - 依赖关系硬编码在代码中\n   - 无法在运行时动态配置\n   - 扩展性差\n\n**Spring IoC/DI 的优势：**\n\n1. **松耦合**\n   - 通过接口编程，依赖抽象\n   - 运行时注入具体实现\n   - 便于单元测试（Mock注入）\n\n2. **集中管理**\n   - 容器统一管理对象生命周期\n   - 自动处理依赖关系\n   - 支持作用域管理（单例、原型等）\n\n3. **配置灵活**\n   - XML、注解、Java配置多种方式\n   - 支持条件配置和Profile\n   - 运行时动态修改\n\n4. **AOP支持**\n   - 便于实现横切关注点\n   - 无需修改业务代码\n   - 提高代码复用性\n\n**实际应用示例：**\n\n```java\n// 传统方式：紧耦合\npublic class UserService {\n    private UserDao userDao = new UserDaoImpl(); // 硬编码依赖\n    \n    public User getUser(Long id) {\n        return userDao.findById(id);\n    }\n}\n\n// Spring方式：松耦合\n@Service\npublic class UserService {\n    @Autowired\n    private UserDao userDao; // 依赖注入\n    \n    public User getUser(Long id) {\n        return userDao.findById(id);\n    }\n}\n\n// 接口定义\npublic interface UserDao {\n    User findById(Long id);\n}\n\n// 具体实现\n@Repository\npublic class UserDaoImpl implements UserDao {\n    // 实现\n}\n```\n\n**最佳实践：**\n- 优先使用构造函数注入\n- 避免字段注入（影响测试）\n- 使用接口定义依赖契约\n- 合理使用@Component系列注解\n\nIoC和DI是Spring框架的基石，它们通过控制反转和依赖注入实现了对象的解耦和集中管理，大大提高了代码的可维护性和可测试性。",
       "tags": [
         "中级",
         "Spring",
@@ -31,7 +31,7 @@
       "date": "2026-04-04",
       "title": "缓存穿透、击穿、雪崩分别是什么？",
       "prompt": "各给一条治理思路。",
-      "answer": "穿透：查询不存在键压垮存储→布隆过滤器/空值缓存；击穿：热点过期→互斥重建/逻辑过期；雪崩：集体过期→随机 TTL/多级缓存/限流。 短链系统需关注映射表与缓存一致性，读多可缓存，写侧要防止冲突和碰撞。 短链系统需关注映射表与缓存一致性，读多可缓存，写侧要防止冲突和碰撞。",
+      "answer": "技术问题：缓存穿透、击穿、雪崩分别是什么？\n\n详细解答：\n\n存储与缓存类问题通常关注数据访问性能、数据一致性和系统可扩展性。 Redis 不只是 KV 存储，还提供多种数据结构如字符串、哈希、列表、集合、有序集合；不同结构适合不同场景，比如计数、排行榜、消息队列。 缓存穿透、击穿、雪崩分别是查询不存在数据、热点数据失效并发请求、缓存节点同时失效导致请求洪峰的问题，对应的治理策略有布隆过滤器、锁、过期错峰、降级等。\n\n针对提问“各给一条治理思路。”，需要说明具体的业务场景与数据访问模式、以及如何根据查找、更新、删除频率来选择策略。",
       "tags": [
         "高级",
         "JVM",
@@ -45,7 +45,7 @@
       "date": "2026-04-04",
       "title": "Redis 常见数据结构与应用场景？",
       "prompt": "为什么不仅仅是 KV？",
-      "answer": "String/Hash/List/Set/ZSet/Bitmap/HyperLogLog 等；不同结构对应计数、排行榜、去重、位图统计等高效模式。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。",
+      "answer": "技术问题：Redis 常见数据结构与应用场景？\n\n详细解答：\n\n存储与缓存类问题通常关注数据访问性能、数据一致性和系统可扩展性。 Redis 不只是 KV 存储，还提供多种数据结构如字符串、哈希、列表、集合、有序集合；不同结构适合不同场景，比如计数、排行榜、消息队列。 缓存穿透、击穿、雪崩分别是查询不存在数据、热点数据失效并发请求、缓存节点同时失效导致请求洪峰的问题，对应的治理策略有布隆过滤器、锁、过期错峰、降级等。\n\n针对提问“为什么不仅仅是 KV？”，需要说明具体的业务场景与数据访问模式、以及如何根据查找、更新、删除频率来选择策略。",
       "tags": [
         "中级",
         "JVM",
@@ -58,7 +58,7 @@
       "date": "2026-04-04",
       "title": "用直觉解释 MVCC。",
       "prompt": "它主要优化什么？",
-      "answer": "多版本数据避免读写完全互斥，提高并发；读往往读取快照版本，写创建新版本（细节因引擎而异）。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。",
+      "answer": "针对问题：用直觉解释 MVCC。\n\n详细解答：\n\n这个问题涉及 用直觉解释 MVCC。 的核心概念、适用场景和实践注意点。 针对“它主要优化什么？”，需要结合常见业务模式来理解，并说明具体取舍与风险。\n\n补充说明：该问题涉及的背景、原理和实践建议都需要结合常见场景来理解。 进一步理解后，可以更好地把握适用条件和潜在风险。\n\n补充说明：该问题涉及的背景、原理和实践建议都需要结合常见场景来理解。 进一步理解后，可以更好地把握适用条件和潜在风险。\n\n补充说明：该问题涉及的背景、原理和实践建议都需要结合常见场景来理解。 进一步理解后，可以更好地把握适用条件和潜在风险。",
       "tags": [
         "高级",
         "JVM",

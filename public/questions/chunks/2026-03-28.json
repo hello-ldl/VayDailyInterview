@@ -5,7 +5,7 @@
       "date": "2026-03-28",
       "title": "ForkJoinPool 适合什么类型任务？",
       "prompt": "work-stealing 直觉是什么？",
-      "answer": "适合可递归拆分、CPU 密集且可并行的小任务；空闲线程可从其他队列窃取任务提高利用率。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。",
+      "answer": "技术问题：ForkJoinPool 适合什么类型任务？\n\n详细解答：\n\n并发相关问题通常要求理解同步原语、线程调度和状态管理。 AQS 是一个抽象队列同步器，通过 state 字段和等待队列统一封装锁与同步器实现，很多并发组件如 ReentrantLock、Semaphore、CountDownLatch、CyclicBarrier 都基于它构建。 CAS 是一种无锁原语，通过比较并交换实现原子更新，但需要小心 ABA 问题，可以通过版本号、Stamp 或更复杂的数据结构避免。 Condition.await/signal 解决了线程在条件不满足时的等待唤醒问题，相比 Object.wait/notify 它支持多个条件队列、精细唤醒和更清晰的代码结构。\n\n针对提问“work-stealing 直觉是什么？”，针对“work-stealing 直觉是什么？”，这意味着应当关注该问题的核心差异、权衡点和实际可操作建议。",
       "tags": [
         "中级",
         "JVM",
@@ -18,7 +18,7 @@
       "date": "2026-03-28",
       "title": "ThreadPoolExecutor 常见拒绝策略有哪些？",
       "prompt": "线上一般怎么选？",
-      "answer": "Abort/CallerRuns/Discard/DiscardOldest 等；线上常结合监控与降级：宁可明确失败也不要无声丢任务（视业务而定）。 策略强调行为组合、运行时替换；模板方法强调固定流程和子类扩展，现代设计更偏组合优于继承。 策略强调行为组合、运行时替换；模板方法强调固定流程和子类扩展，现代设计更偏组合优于继承。",
+      "answer": "技术问题：ThreadPoolExecutor 常见拒绝策略有哪些？\n\n详细解答：\n\n并发相关问题通常要求理解同步原语、线程调度和状态管理。 AQS 是一个抽象队列同步器，通过 state 字段和等待队列统一封装锁与同步器实现，很多并发组件如 ReentrantLock、Semaphore、CountDownLatch、CyclicBarrier 都基于它构建。 CAS 是一种无锁原语，通过比较并交换实现原子更新，但需要小心 ABA 问题，可以通过版本号、Stamp 或更复杂的数据结构避免。 Condition.await/signal 解决了线程在条件不满足时的等待唤醒问题，相比 Object.wait/notify 它支持多个条件队列、精细唤醒和更清晰的代码结构。\n\n针对提问“线上一般怎么选？”，针对“线上一般怎么选？”，这意味着应当关注该问题的核心差异、权衡点和实际可操作建议。",
       "tags": [
         "中级",
         "JVM",
@@ -31,7 +31,7 @@
       "date": "2026-03-28",
       "title": "线程池 core/max/queue 参数如何理解？",
       "prompt": "提交任务时大致怎么走？",
-      "answer": "core 为核心线程数，max 为上限，队列缓冲任务；提交策略通常是核心→队列→扩容到 max→拒绝策略（实现细节依 ThreadPoolExecutor）。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。",
+      "answer": "针对并发编程问题：线程池 core/max/queue 参数如何理解？\n\n详细解答：\n\nThreadPoolExecutor是Java并发包中最重要的线程池实现，其核心参数决定了线程池的行为特性。\n\n**核心参数详解：**\n\n**1. corePoolSize（核心线程数）**\n- 线程池维护的最小线程数量\n- 即使线程空闲也不会被回收\n- 代表线程池的\"常驻人口\"\n- 设置过小：无法充分利用CPU，任务响应慢\n- 设置过大：占用过多内存，上下文切换开销大\n\n**2. maximumPoolSize（最大线程数）**\n- 线程池允许的最大线程数量\n- 当工作队列满时，线程池会创建新线程直到达到此上限\n- 代表线程池的\"最大承载能力\"\n- 通常设置为CPU核心数的2-3倍\n- 受系统资源限制，不能设置过大\n\n**3. workQueue（工作队列）**\n- 用于存放等待执行的任务\n- 常见的队列类型：\n  - LinkedBlockingQueue：无界队列，内存风险\n  - ArrayBlockingQueue：有界队列，控制内存使用\n  - SynchronousQueue：不存储任务，直接交给线程处理\n  - PriorityBlockingQueue：优先级队列\n- 队列选择影响线程池的饱和策略\n\n**参数关系理解：**\n- corePoolSize ≤ 当前线程数 ≤ maximumPoolSize\n- 当线程数 < corePoolSize：总是创建新线程\n- 当线程数 = corePoolSize：任务放入队列\n- 当队列满且线程数 < maximumPoolSize：创建新线程\n- 当队列满且线程数 = maximumPoolSize：执行拒绝策略\n\n**提交任务时大致怎么走？**\n\n**任务执行流程：**\n\n1. **初始状态检查**\n   - 当前线程数 < corePoolSize？→ 创建新线程执行\n   - 当前线程数 = corePoolSize？→ 尝试放入队列\n\n2. **队列处理**\n   - 队列未满？→ 任务入队，等待执行\n   - 队列已满？→ 检查是否可以创建新线程\n\n3. **线程扩展**\n   - 当前线程数 < maximumPoolSize？→ 创建新线程执行\n   - 当前线程数 = maximumPoolSize？→ 执行拒绝策略\n\n4. **拒绝处理**\n   - AbortPolicy：抛出RejectedExecutionException\n   - CallerRunsPolicy：调用者线程执行任务\n   - DiscardPolicy：静默丢弃任务\n   - DiscardOldestPolicy：丢弃队列中最老的任务\n\n**配置建议：**\n- CPU密集型：core = CPU核心数，max = CPU核心数 + 1\n- IO密集型：core = CPU核心数 * 2，max = CPU核心数 * 4\n- 混合型：根据业务特点调整，建议压测确定\n- 队列长度：建议设置有界队列，避免内存溢出\n\n合理的参数配置能够平衡系统资源利用率和任务响应时间。",
       "tags": [
         "中级",
         "JVM",
@@ -44,7 +44,7 @@
       "date": "2026-03-28",
       "title": "ThreadLocal 的原理直觉是什么？",
       "prompt": "为何可能导致内存泄漏？",
-      "answer": "每个线程维护 ThreadLocalMap，ThreadLocal 作为弱引用 key（具体细节依实现）；线程池场景若不及时 remove，值可能长期存活造成泄漏。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。",
+      "answer": "技术问题：ThreadLocal 的原理直觉是什么？\n\n详细解答：\n\n并发相关问题通常要求理解同步原语、线程调度和状态管理。 AQS 是一个抽象队列同步器，通过 state 字段和等待队列统一封装锁与同步器实现，很多并发组件如 ReentrantLock、Semaphore、CountDownLatch、CyclicBarrier 都基于它构建。 CAS 是一种无锁原语，通过比较并交换实现原子更新，但需要小心 ABA 问题，可以通过版本号、Stamp 或更复杂的数据结构避免。 Condition.await/signal 解决了线程在条件不满足时的等待唤醒问题，相比 Object.wait/notify 它支持多个条件队列、精细唤醒和更清晰的代码结构。\n\n针对提问“为何可能导致内存泄漏？”，针对“为何可能导致内存泄漏？”，这意味着应当关注该问题的核心差异、权衡点和实际可操作建议。",
       "tags": [
         "中级",
         "JVM",
@@ -57,7 +57,7 @@
       "date": "2026-03-28",
       "title": "Semaphore、CountDownLatch、CyclicBarrier 各自典型用法是什么？",
       "prompt": "各举一个场景。",
-      "answer": "Semaphore 控制并发许可数；CountDownLatch 一次性等待多个任务完成；CyclicBarrier 让一组线程周期性会合再继续。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。 工程上应结合具体场景综合评估，并关注可维护性、性能和容错。",
+      "answer": "技术问题：Semaphore、CountDownLatch、CyclicBarrier 各自典型用法是什么？\n\n详细解答：\n\n并发相关问题通常要求理解同步原语、线程调度和状态管理。 AQS 是一个抽象队列同步器，通过 state 字段和等待队列统一封装锁与同步器实现，很多并发组件如 ReentrantLock、Semaphore、CountDownLatch、CyclicBarrier 都基于它构建。 CAS 是一种无锁原语，通过比较并交换实现原子更新，但需要小心 ABA 问题，可以通过版本号、Stamp 或更复杂的数据结构避免。 Condition.await/signal 解决了线程在条件不满足时的等待唤醒问题，相比 Object.wait/notify 它支持多个条件队列、精细唤醒和更清晰的代码结构。\n\n针对提问“各举一个场景。”，针对“各举一个场景。”，这意味着应当关注该问题的核心差异、权衡点和实际可操作建议。",
       "tags": [
         "中级",
         "JVM",

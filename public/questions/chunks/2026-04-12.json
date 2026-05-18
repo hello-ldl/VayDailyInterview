@@ -5,7 +5,7 @@
       "date": "2026-04-12",
       "title": "何时应该优先使用 synchronized 与 ReentrantLock？",
       "prompt": "它最适合解决什么问题？",
-      "answer": "synchronized 是 JVM 内置锁，语法简单；ReentrantLock 提供可中断、超时与公平策略，适合更复杂的同步需求。 这通常在实际场景中体现为架构或代码级的显式选择。",
+      "answer": "针对并发编程问题：何时应该优先使用 synchronized 与 ReentrantLock？\n\n详细解答：\n\nJava中synchronized关键字和ReentrantLock是两种主要的锁实现机制。\n\n**synchronized关键字的特点：**\n- 语法层面：Java语言内置的关键字，无需显式获取和释放锁\n- 自动管理：JVM自动管理锁的获取和释放\n- 不可中断：一旦获取锁，线程无法被中断\n- 条件等待：只能通过wait()/notify()机制\n\n**ReentrantLock的特点：**\n- API层面：java.util.concurrent.locks包中的类\n- 手动管理：需要显式调用lock()和unlock()\n- 可中断：支持lockInterruptibly()方法允许线程中断\n- 条件等待：支持多个Condition对象，实现更灵活的等待通知\n- 公平性：可以选择公平锁或非公平锁\n- 超时机制：支持tryLock()和tryLock(long, TimeUnit)\n\n**它最适合解决什么问题？**\n选择标准：\n- 简单场景：优先使用synchronized，代码简洁\n- 复杂场景：需要可中断、超时、公平性时使用ReentrantLock\n- 性能敏感：考虑StampedLock的乐观读策略\n\n两种锁实现都是可重入的，都支持同一个线程多次获取同一把锁。",
       "tags": [
         "中级",
         "Java",
@@ -17,7 +17,7 @@
       "date": "2026-04-12",
       "title": "synchronized 与 ReentrantLock 的核心是什么？",
       "prompt": "为什么它对系统稳定性很重要？",
-      "answer": "synchronized 是 JVM 内置锁，语法简单；ReentrantLock 提供可中断、超时与公平策略，适合更复杂的同步需求。 它是理解后续优化与错误诊断的关键。",
+      "answer": "针对并发编程问题：synchronized 与 ReentrantLock 的核心是什么？\n\n详细解答：\n\nJava中synchronized关键字和ReentrantLock是两种主要的锁实现机制。\n\n**synchronized关键字的特点：**\n- 语法层面：Java语言内置的关键字，无需显式获取和释放锁\n- 自动管理：JVM自动管理锁的获取和释放\n- 不可中断：一旦获取锁，线程无法被中断\n- 条件等待：只能通过wait()/notify()机制\n\n**ReentrantLock的特点：**\n- API层面：java.util.concurrent.locks包中的类\n- 手动管理：需要显式调用lock()和unlock()\n- 可中断：支持lockInterruptibly()方法允许线程中断\n- 条件等待：支持多个Condition对象，实现更灵活的等待通知\n- 公平性：可以选择公平锁或非公平锁\n- 超时机制：支持tryLock()和tryLock(long, TimeUnit)\n\n**为什么它对系统稳定性很重要？**\n选择标准：\n- 简单场景：优先使用synchronized，代码简洁\n- 复杂场景：需要可中断、超时、公平性时使用ReentrantLock\n- 性能敏感：考虑StampedLock的乐观读策略\n\n两种锁实现都是可重入的，都支持同一个线程多次获取同一把锁。",
       "tags": [
         "中级",
         "Java",
@@ -29,7 +29,7 @@
       "date": "2026-04-12",
       "title": "volatile 关键字 与 synchronized 的区别是什么？",
       "prompt": "如何在两者间做取舍？",
-      "answer": "保证写入后对其他线程可见并禁止特定重排序，适合状态标志但不保证复合操作的原子性。 需要结合具体业务和实现来选型，不要盲目套用。",
+      "answer": "针对并发编程问题：volatile 关键字 与 synchronized 的区别是什么？\n\n详细解答：\n\nJava中synchronized关键字和ReentrantLock是两种主要的锁实现机制。\n\n**synchronized关键字的特点：**\n- 语法层面：Java语言内置的关键字，无需显式获取和释放锁\n- 自动管理：JVM自动管理锁的获取和释放\n- 不可中断：一旦获取锁，线程无法被中断\n- 条件等待：只能通过wait()/notify()机制\n\n**ReentrantLock的特点：**\n- API层面：java.util.concurrent.locks包中的类\n- 手动管理：需要显式调用lock()和unlock()\n- 可中断：支持lockInterruptibly()方法允许线程中断\n- 条件等待：支持多个Condition对象，实现更灵活的等待通知\n- 公平性：可以选择公平锁或非公平锁\n- 超时机制：支持tryLock()和tryLock(long, TimeUnit)\n\n**如何在两者间做取舍？**\n选择标准：\n- 简单场景：优先使用synchronized，代码简洁\n- 复杂场景：需要可中断、超时、公平性时使用ReentrantLock\n- 性能敏感：考虑StampedLock的乐观读策略\n\n两种锁实现都是可重入的，都支持同一个线程多次获取同一把锁。",
       "tags": [
         "中级",
         "Java",
@@ -41,7 +41,7 @@
       "date": "2026-04-12",
       "title": "volatile 关键字 的常见误区有哪些？",
       "prompt": "实际应用中要避免什么？",
-      "answer": "保证写入后对其他线程可见并禁止特定重排序，适合状态标志但不保证复合操作的原子性。 错误理解会导致不可预期的并发问题或性能退化。",
+      "answer": "针对并发编程问题：volatile 关键字 的常见误区有哪些？\n\n详细解答：\n\n常见误区包括：认为 volatile 可以保证原子性；认为它相当于锁；认为 volatile 修饰的对象内部状态也能自动安全；以及把 volatile 用于复杂读-改-写操作。\n\n实际应用中要避免什么：volatile 只适用于简单状态标志或不可变对象引用，不能用于计数器、自增、集合修改等场景。",
       "tags": [
         "中级",
         "Java",
@@ -53,7 +53,7 @@
       "date": "2026-04-12",
       "title": "何时应该优先使用 volatile 关键字？",
       "prompt": "它最适合解决什么问题？",
-      "answer": "保证写入后对其他线程可见并禁止特定重排序，适合状态标志但不保证复合操作的原子性。 这通常在实际场景中体现为架构或代码级的显式选择。",
+      "answer": "针对并发编程问题：何时应该优先使用 volatile 关键字？\n\n详细解答：\n\n当共享变量只用于状态标志、开关、初始化完成标记等简单读写场景，且不涉及多个步骤的复合操作时，可优先使用 volatile。比如停止线程的 boolean flag、双重检查锁定中的状态检查。\n\n它最适合解决的问题是：确保线程间的可见性和防止指令重排序，而不是替代 synchronized。",
       "tags": [
         "中级",
         "Java",
