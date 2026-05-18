@@ -160,3 +160,4 @@ git push origin main
 ```
 
 > 如果仓库已经配置 GitHub Pages，推送后即可触发自动发布。
+> 本项目已配置自定义域名 `interview.vaydaily.top`，部署时会自动生成 `CNAME` 文件。
