@@ -186,8 +186,8 @@ function parseJsonFromText(text) {
 }
 
 async function fetchQuestionsFromModel(date) {
-  const prompt = `请生成今天日期为 ${date} 的 5 道 Java 技术面试题目。返回一个 JSON 数组，数组中每个元素必须包含以下字段：\n- title（题目标题）\n- prompt（对题目的补充说明）\n- answer（不少于 120 字的详细标准答案）\n- tags（标签数组，最好包含 2 到 4 个相关标签）\n\n请只返回纯 JSON，不要附带 Markdown、注释或额外说明。`
-
+  const prompt = `请生成今天日期为 ${date} 的 5 道 Java 技术面试题目。返回一个 JSON 数组，数组中每个元素必须包含以下字段：\n- title（题目标题）\n- prompt（对题目的补充说明）\n- answer（不少于 120 字的详细标准答案）\n- tags（标签数组，最好包含 2 到 4 个相关标签）\n\n请只返回纯 JSON，不要附带 Markdown、注释或额外说明。\n\n答案部分请使用中文分段书写，段落分明、逻辑清晰，排版美观，每个段落保持句子紧凑且易读。
+`
   const apiBase = API_PROVIDER === 'deepseek' ? DEEPSEEK_API_BASE : 'https://api.openai.com/v1'
   const apiKey = API_PROVIDER === 'deepseek' ? DEEPSEEK_API_KEY : OPENAI_API_KEY
   const url = `${apiBase.replace(/\/$/, '')}/chat/completions`

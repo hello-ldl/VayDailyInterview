@@ -98,6 +98,7 @@ npm run preview
 - 如果改用 Deepseek，设置：`QUESTION_API_PROVIDER=deepseek` 和 `DEEPSEEK_API_KEY`
   - 默认 `DEEPSEEK_API_BASE=https://api.deepseek.com/anthropic`
   - 默认 `QUESTION_MODEL=deepseek-v4-pro`
+- 答案要求：清晰分段、段落分明、格式美观
 - 可选参数：`QUESTION_DATE=YYYY-MM-DD` 用于生成指定日期题目
 - 脚本会自动写入 `public/questions/chunks/YYYY-MM-DD.json`，并更新 `public/questions/meta.json`
 - 生成完成后会自动提交并推送到 `main`

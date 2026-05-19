@@ -126,6 +126,7 @@ export DEEPSEEK_API_KEY=your_deepseek_api_key
 Deepseek 默认使用：
 - 基础地址 `https://api.deepseek.com/anthropic`
 - API 模型 `deepseek-v4-pro`
+- 生成答案要求：清晰分段、段落分明、格式美观
 
 如果要指定某个日期，可以这样运行：
 
