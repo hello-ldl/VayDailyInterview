@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "gen:bank": "node scripts/emit-java-bank.mjs",
+    "gen:daily": "node scripts/generate-daily-question.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

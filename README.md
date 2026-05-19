@@ -100,6 +100,45 @@ npm run build
 npm run preview
 ```
 
+### 每日题库自动生成脚本
+
+项目增加了一个自动生成当天题库并推送到 Git 的脚本：
+
+```bash
+npm run gen:daily
+```
+
+脚本默认使用今天日期生成 5 道 Java 技术面试题，并自动更新 `public/questions/meta.json`。
+
+需要配置环境变量：
+
+```bash
+export OPENAI_API_KEY=your_api_key_here
+```
+
+如果需要改用 Deepseek，请设置：
+
+```bash
+export QUESTION_API_PROVIDER=deepseek
+export DEEPSEEK_API_KEY=your_deepseek_api_key
+```
+
+Deepseek 默认使用：
+- 基础地址 `https://api.deepseek.com/anthropic`
+- API 模型 `deepseek-v4-pro`
+
+如果要指定某个日期，可以这样运行：
+
+```bash
+QUESTION_DATE=2026-05-21 npm run gen:daily
+```
+
+在 Mac 或 Linux 上，可以用 cron 定时执行：
+
+```bash
+0 3 * * * cd /Users/lidonglin/cursor/VayDailyInterview && OPENAI_API_KEY=your_api_key_here npm run gen:daily
+```
+
 ### 题库数据结构
 
 题库数据位于 `public/questions/`，按照日期分块存储。

@@ -91,11 +91,19 @@ npm run preview
 4. 运行构建验证：
    - `npm run build`
 
+## 自动生成每日题库
+
+- 运行脚本：`npm run gen:daily`
+- 如果使用 OpenAI，设置 `OPENAI_API_KEY`
+- 如果改用 Deepseek，设置：`QUESTION_API_PROVIDER=deepseek` 和 `DEEPSEEK_API_KEY`
+  - 默认 `DEEPSEEK_API_BASE=https://api.deepseek.com/anthropic`
+  - 默认 `QUESTION_MODEL=deepseek-v4-pro`
+- 可选参数：`QUESTION_DATE=YYYY-MM-DD` 用于生成指定日期题目
+- 脚本会自动写入 `public/questions/chunks/YYYY-MM-DD.json`，并更新 `public/questions/meta.json`
+- 生成完成后会自动提交并推送到 `main`
+
 ## 已有报告与脚本
 
-- `public/questions/answer-lengths-by-date.md`：按日期列出每题答案长度的表格。
-- `public/questions/answer-lengths-summary-by-date.md`：按日期汇总题目数量、最小/最大/平均答案长度。
-- `public/questions/answer-lengths.json`：所有题目答案长度统计数据。
 - `scripts/`：包含生成与修复题库数据的脚本。
 
 ## 提交与发布
