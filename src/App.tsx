@@ -7,7 +7,7 @@ import { PracticePage } from './pages/PracticePage'
 
 function routerBasename(): string | undefined {
   const b = import.meta.env.BASE_URL
-  if (b === '/') return undefined
+  if (!b || b === '/' || b === './') return undefined
   return b.endsWith('/') ? b.slice(0, -1) : b
 }
 

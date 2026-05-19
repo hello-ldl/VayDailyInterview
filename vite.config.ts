@@ -7,7 +7,7 @@ import { defineConfig } from 'vite'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // GitHub Pages project site: set VITE_BASE_URL=/RepositoryName/ in CI (see workflow).
-const base = process.env.VITE_BASE_URL ?? '/'
+const base = process.env.VITE_BASE_URL ?? './'
 
 // https://vite.dev/config/
 export default defineConfig({
