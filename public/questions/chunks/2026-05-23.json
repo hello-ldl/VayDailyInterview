@@ -1,0 +1,69 @@
+{
+  "questions": [
+    {
+      "id": "java-311",
+      "date": "2026-05-23",
+      "title": "volatile 关键字的作用及可见性、有序性原理",
+      "prompt": "请解释 Java 中 volatile 关键字的作用，以及它如何保证可见性和一定程度的有序性。请结合内存屏障和 happens-before 原则进行说明。",
+      "answer": "volatile 是 Java 提供的轻量级同步机制，主要保证变量的可见性和禁止指令重排序。当一个变量被声明为 volatile 后，线程在读取该变量时，总会从主内存中获取最新值；在写入后，会立即将新值刷新回主内存，从而保证其他线程能够立即看到修改。这种可见性是通过内存屏障实现的：在 volatile 写操作前会插入 StoreStore 屏障，写操作后插入 StoreLoad 屏障；在读操作后会插入 LoadLoad 和 LoadStore 屏障，这些屏障强制缓存与主内存的数据同步。\n\n在有序性方面，volatile 通过 happens-before 原则禁止指令重排序。具体来说，对 volatile 变量的写操作 happens-before 后续对该变量的读操作，这意味着写之前的操作不会被重排到写之后，读之后的操作不会被重排到读之前，从而让代码的执行顺序在关键点上保持一致。虽然 volatile 不保证原子性，但在状态标志、双重检查锁定等场景中，它能够以较低的代价实现线程间通信，是并发编程中不可或缺的工具。",
+      "tags": [
+        "并发编程",
+        "volatile",
+        "内存模型",
+        "JMM"
+      ]
+    },
+    {
+      "id": "java-312",
+      "date": "2026-05-23",
+      "title": "HashMap 在 JDK 1.8 中的优化与线程安全问题",
+      "prompt": "请说明 HashMap 在 JDK 1.8 中相比于 1.7 有哪些主要优化？另外，为什么 HashMap 不是线程安全的？请举例说明并发场景下可能出现的问题。",
+      "answer": "JDK 1.8 对 HashMap 的实现进行了多项重要优化。首先，底层数据结构从数组加链表变成了数组加链表和红黑树。当链表长度超过阈值 8 且数组长度大于等于 64 时，链表会转换为红黑树，以减少在哈希冲突严重时查询时间复杂度从 O(n) 降到 O(log n)，提升性能。其次，插入方式从 1.7 的头插法改为尾插法，避免了 resize 过程中链表反转导致的死循环问题。此外，哈希扰动处理被简化，不再使用多次异或和移位，只将高 16 位与低 16 位异或，兼顾效率和分布性。\n\nHashMap 非线程安全的原因主要体现在扩容和数据写入阶段。在 1.7 中，多线程同时进行扩容时容易产生环形链表，导致 CPU 占用 100% 的死循环。1.8 虽然解决了死循环问题，但仍存在数据丢失和覆盖风险。例如，当两个线程同时执行 put 操作，可能发生不同的节点被放进同一个槽位而导致覆盖，或者 size 字段的 ++ 操作非原子性，造成元素计数错误。因此在并发环境下应使用 ConcurrentHashMap 或显式同步措施。",
+      "tags": [
+        "集合框架",
+        "HashMap",
+        "线程安全",
+        "JDK优化"
+      ]
+    },
+    {
+      "id": "java-313",
+      "date": "2026-05-23",
+      "title": "Java 线程池的核心参数及拒绝策略",
+      "prompt": "请详细阐述 ThreadPoolExecutor 的构造方法中各个核心参数的含义，以及当任务过多时内置的四种拒绝策略分别是什么，各自适用什么场景？",
+      "answer": "ThreadPoolExecutor 的构造参数包含核心线程数 corePoolSize、最大线程数 maximumPoolSize、空闲线程存活时间 keepAliveTime 及其单位 unit、工作队列 workQueue、线程工厂 threadFactory 和拒绝策略 handler。当新任务提交时，若当前线程数小于核心线程数，会直接创建新线程执行任务；若已达到核心线程数且工作队列未满，任务进入队列等待；若队列已满但线程数小于最大线程数，则创建临时线程处理；若队列满且线程数达到最大值，则触发拒绝策略。\n\n四种内置拒绝策略各有不同。AbortPolicy 是默认策略，会直接抛出 RejectedExecutionException，适合需要感知任务无法执行的场景，以便上层处理。CallerRunsPolicy 将任务回退给提交任务的线程执行，起到减速作用，能避免任务丢失但可能降低吞吐，适合对延迟要求不高的场景。DiscardPolicy 静默丢弃无法处理的任务，不做任何通知，适用于非关键业务或允许丢失的场景。DiscardOldestPolicy 丢弃队列中最旧的任务，然后重新提交当前任务，适合需要优先处理最新数据的场景，例如实时监控系统。理解这些策略有助于根据业务特性合理配置线程池。",
+      "tags": [
+        "并发编程",
+        "线程池",
+        "ThreadPoolExecutor",
+        "拒绝策略"
+      ]
+    },
+    {
+      "id": "java-314",
+      "date": "2026-05-23",
+      "title": "Spring Bean 的生命周期",
+      "prompt": "请描述 Spring 容器中一个 Bean 从创建到销毁的完整生命周期，包括关键的初始化与销毁回调、后置处理器的作用等。",
+      "answer": "Spring Bean 的生命周期大致可分为实例化、属性赋值、初始化和销毁四个阶段。容器启动后，首先通过反射或工厂方法创建 Bean 实例。接着，根据 BeanDefinition 进行依赖注入，填充属性值。如果 Bean 实现了 Aware 系列接口，会回调相应的 set 方法，例如 BeanNameAware、BeanFactoryAware 和 ApplicationContextAware，让 Bean 能够感知容器的相关信息。随后所有已注册的 BeanPostProcessor 的 postProcessBeforeInitialization 方法会被调用，这为开发者提供了在 Bean 初始化前进行自定义处理的扩展点。\n\n初始化阶段会先执行 @PostConstruct 注解的方法或 InitializingBean 接口的 afterPropertiesSet 方法，然后调用配置的 init-method 自定义初始化方法。初始化完成后，BeanPostProcessor 的 postProcessAfterInitialization 会被触发，常用于创建代理对象等增强操作。至此 Bean 已完全就绪，可提供服务。当容器关闭时，DestroyBean 的过程开始：先执行 @PreDestroy 方法或 DisposableBean 接口的 destroy 方法，再调用自定义的 destroy-method，释放资源。整个生命周期中的众多回调赋予了 Spring 极大的灵活性与扩展能力。",
+      "tags": [
+        "Spring",
+        "Bean生命周期",
+        "初始化",
+        "依赖注入"
+      ]
+    },
+    {
+      "id": "java-315",
+      "date": "2026-05-23",
+      "title": "类加载过程与双亲委派模型",
+      "prompt": "请解释 Java 类加载的过程（加载、验证、准备、解析、初始化），并详细说明双亲委派模型的工作原理、优点以及如何打破该模型。",
+      "answer": "Java 类加载过程分为加载、验证、准备、解析和初始化五个步骤。加载阶段通过类的全限定名找到对应字节码，并生成一个代表该类的 Class 对象。验证阶段确保字节码符合规范和安全要求，避免恶意代码破坏虚拟机。准备阶段为类的静态变量分配内存并赋予默认零值。解析阶段将常量池的符号引用替换为直接引用。初始化阶段执行类构造器 <clinit> 方法，初始化静态变量和静态代码块，这也是真正可执行的 Java 代码的开始。\n\n双亲委派模型要求除启动类加载器外，所有类加载器在收到类加载请求时都优先委派给父加载器去完成，只有父加载器无法加载时，才尝试自己加载。这种机制保证了 Java 核心类库（如 java.lang.Object）的统一性，避免被用户自定义的同名类篡改，同时也防止类重复加载，节省内存。然而，该模型也存在局限。打破方式包括重写 findClass 方法而非 loadClass 方法，以自定义加载逻辑而不破坏委派关系；另一种常见做法是使用线程上下文类加载器（Thread Context ClassLoader），如 SPI 机制中服务提供者类的加载就绕过了双亲委派，由当前线程的上下文加载器直接加载。Tomcat 的 WebappClassLoader 也打破了双亲委派，优先加载自身应用中的类，实现应用的隔离。",
+      "tags": [
+        "JVM",
+        "类加载",
+        "双亲委派",
+        "类加载器"
+      ]
+    }
+  ]
+}
