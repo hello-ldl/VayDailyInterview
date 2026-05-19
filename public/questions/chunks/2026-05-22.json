@@ -1,0 +1,69 @@
+{
+  "questions": [
+    {
+      "id": "java-306",
+      "date": "2026-05-22",
+      "title": "解释Java内存模型（JMM）中的happens-before原则及其重要性",
+      "prompt": "请详细说明Java内存模型中happens-before原则的定义，列举至少5条具体的happens-before规则，并解释它们如何保障多线程环境下代码的可见性和有序性。",
+      "answer": "Happens-before是Java内存模型（JMM）中定义的一种偏序关系，用于描述多线程环境下操作之间的内存可见性和有序性保证。如果操作A happens-before 操作B，那么操作A的结果对操作B是可见的，且执行顺序上A在B之前。这一原则是程序员判断数据是否存在竞争、是否需要额外同步的重要依据。常见的happens-before规则包括：1）程序次序规则：同一线程内，前面的操作happens-before后面的操作；2）监视器锁规则：解锁操作happens-before后续对同一锁的加锁操作；3）volatile变量规则：对volatile域的写操作happens-before后续对该域的读操作；4）线程启动规则：Thread.start()调用happens-before启动线程中的任意操作；5）线程终止规则：线程中的所有操作happens-before其他线程检测到该线程终止（通过join或isAlive判断）；6）传递性规则：如果A happens-before B，且B happens-before C，那么A happens-before C。这些规则共同约束了编译器和处理器的重排序行为，确保在正确同步的程序中，多线程执行结果与顺序一致性模型一致，从而保障了并发编程的可靠性和可预测性。",
+      "tags": [
+        "Java内存模型",
+        "多线程",
+        "并发编程",
+        "JMM"
+      ]
+    },
+    {
+      "id": "java-307",
+      "date": "2026-05-22",
+      "title": "比较Java中的ArrayList和LinkedList，分析其内部实现和适用场景",
+      "prompt": "请从数据结构、随机访问性能、插入删除性能、内存占用等方面对比ArrayList和LinkedList，并说明在什么情况下选择哪种集合。",
+      "answer": "ArrayList底层基于动态数组实现，内部维护一个Object[]数组，支持快速随机访问，时间复杂度为O(1)。由于数组的内存连续性，它能够高效利用CPU缓存，但在插入或删除元素时，需要移动后续元素，平均复杂度为O(n)，尤其在头尾插入时效率较低。扩容机制需要复制整个数组到新空间，默认扩容1.5倍。LinkedList底层基于双向链表实现，每个节点包含前后引用。随机访问需要从头或尾遍历，时间复杂度为O(n)。插入和删除操作只需修改节点引用，在已知节点位置时复杂度为O(1)，但需要先定位节点，总体开销较大。内存占用方面，LinkedList每个元素多两个引用字段，消耗更大。因此，当需要频繁随机访问或在末尾追加数据时，优先使用ArrayList；当需要频繁在头部或中间进行插入删除，且不需要索引访问时，LinkedList更合适。大多数场景下ArrayList更常用，除非明确存在大量头部插入需求。",
+      "tags": [
+        "集合框架",
+        "数据结构",
+        "性能优化",
+        "List"
+      ]
+    },
+    {
+      "id": "java-308",
+      "date": "2026-05-22",
+      "title": "Java中HashMap的工作原理，重点说明JDK 1.8中的优化",
+      "prompt": "请详细讲解HashMap的底层数据结构、哈希冲突解决方案、扩容机制，以及JDK 1.8引入的红黑树优化及其触发条件。",
+      "answer": "HashMap基于哈希表实现，JDK 1.8前采用数组+链表结构，解决哈希冲突使用链地址法。通过计算键的hash值对数组长度取模定位桶位置，若冲突则将新节点插入链表头部。扩容时容量翻倍并重新散列所有元素，可能导致链表过长，查询退化为O(n)。JDK 1.8优化包括：1）链表插入改为尾部插入，避免并发死链但HashMap本身非线程安全；2）当链表长度超过TREEIFY_THRESHOLD（默认8）且数组容量≥64时，链表转化为红黑树，将查询时间复杂度从O(n)降至O(log n)，改善极端冲突下的性能；3）当树节点数降至UNTREEIFY_THRESHOLD（6）时，红黑树退化为链表；4）扩容时采用高位二进制位判断，将链表元素分为两条链，一条留在原索引，另一条去原索引+旧容量位置，减少重计算hash。这些优化显著提升了大规模的HashMap在哈希冲突严重情况下的性能表现，使操作更高效平滑。",
+      "tags": [
+        "HashMap",
+        "集合",
+        "JDK1.8",
+        "源码"
+      ]
+    },
+    {
+      "id": "java-309",
+      "date": "2026-05-22",
+      "title": "Spring框架中Bean的生命周期是怎样的？",
+      "prompt": "请详细描述Spring容器中Bean从创建到销毁的完整生命周期，包括关键的接口和回调方法，并说明Aware接口和BeanPostProcessor的作用。",
+      "answer": "Spring IoC容器中Bean的生命周期大致分为以下几个阶段：1）实例化：容器通过反射调用构造器或工厂方法创建Bean实例；2）属性赋值：根据配置注入依赖属性和引用；3）Aware接口回调：若Bean实现了BeanNameAware、BeanFactoryAware、ApplicationContextAware等接口，容器会依次调用setBeanName()、setBeanFactory()、setApplicationContext()方法，注入相应的容器资源；4）BeanPostProcessor的前置处理：遍历所有注册的BeanPostProcessor，调用postProcessBeforeInitialization()方法，可对Bean进行包装或代理；5）初始化：若Bean实现了InitializingBean接口，调用afterPropertiesSet()方法，若指定了init-method，则执行自定义初始化方法；6）BeanPostProcessor的后置处理：调用postProcessAfterInitialization()，这通常是AOP代理生成的关键节点；7）使用：Bean处于就绪状态，可被应用程序使用；8）销毁：容器关闭时，若Bean实现了DisposableBean接口，调用destroy()，或执行destroy-method方法。整个生命周期可通过BeanPostProcessor进行扩展，实现横切逻辑如日志、权限等，而Aware接口让Bean感知容器资源，增强灵活性。",
+      "tags": [
+        "Spring",
+        "Bean生命周期",
+        "IoC容器",
+        "BeanPostProcessor"
+      ]
+    },
+    {
+      "id": "java-310",
+      "date": "2026-05-22",
+      "title": "如何理解Java中的volatile关键字？它解决了哪些问题，有什么局限性？",
+      "prompt": "请从可见性、禁止指令重排序两方面解释volatile的作用，结合内存屏障说明其原理，并举例volatile不能保证原子性的场景。",
+      "answer": "volatile是Java提供的轻量级同步机制，主要作用有两点：保证共享变量的内存可见性和禁止指令重排序。可见性方面，当一个线程修改volatile变量，新值会立即被写入主内存，并使其他线程工作内存中的缓存行失效，强制后续读从主内存重新加载，避免了数据不一致。禁止重排序通过内存屏障实现：写volatile前插入StoreStore屏障，之后插入StoreLoad屏障；读volatile后插入LoadLoad和LoadStore屏障。这防止了对volatile变量的读写与其他普通变量操作的顺序交换，从而保证了有序性。典型应用是双重检查锁定的单例模式，用volatile修饰实例变量，防止因指令重排序导致返回未完全初始化的对象。然而，volatile不能保证操作的原子性。例如，对volatile int变量执行i++操作，实际包含读、改、写三个步骤，非原子性，多线程下仍会产生错误结果。要保证原子性，需使用synchronized、Lock或Atomic类。volatile适用于单一写、多读的变量标记状态等简单场景，不应滥用。",
+      "tags": [
+        "volatile",
+        "并发编程",
+        "内存屏障",
+        "原子性"
+      ]
+    }
+  ]
+}
