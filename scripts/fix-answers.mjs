@@ -1,3 +1,21 @@
+/**
+ * fix-answers.mjs
+ * ===============
+ * 修复/改进已有题目分片中的架构类答案。
+ *
+ * 功能：
+ *   遍历 public/questions/chunks/ 下所有 JSON 分片文件，
+ *   将其中包含 "架构设计需要权衡各种因素" 占位答案的题目，
+ *   替换为针对具体架构问题的详细解答（如读写分离、模块化单体、SAGA、CQRS 等）。
+ *
+ * 使用方式：
+ *   node scripts/fix-answers.mjs
+ *
+ * 注意：
+ *   这是一个一次性修复脚本，用于批量替换 AI 生成的通用占位答案。
+ *   答案生成函数按题目标题关键词匹配（常见误区、何时优先使用、核心是什么、区别是什么）。
+ */
+
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -6,7 +24,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.join(__dirname, '..')
 const CHUNK_DIR = path.join(ROOT, 'public', 'questions', 'chunks')
 
-// 修复特定题目的答案
+/**
+ * 扫描所有分片文件，替换包含占位文本的答案
+ * 替换策略按题目关键词分为四类：常见误区、适用场景、核心概念、模式区别
+ */
 function fixSpecificAnswers() {
   const files = fs.readdirSync(CHUNK_DIR)
     .filter(f => f.endsWith('.json'))
@@ -16,11 +37,11 @@ function fixSpecificAnswers() {
     const filePath = path.join(CHUNK_DIR, file)
     let content = fs.readFileSync(filePath, 'utf8')
 
-    // 检查是否包含需要修复的答案
+    // 检查是否包含需要修复的占位答案
     if (content.includes('架构设计需要权衡各种因素')) {
       console.log(`Fixing ${file}...`)
 
-      // 替换特定的答案模式
+      // 替换：常见误区类
       content = content.replace(
         /"answer": "针对系统架构问题：([^"]*常见误区[^"]*)\n\n详细解答：\n\n架构设计需要权衡各种因素\.\n\n([^"]*)"/g,
         (match, title, prompt) => {
@@ -29,6 +50,7 @@ function fixSpecificAnswers() {
         }
       )
 
+      // 替换：何时优先使用/适用场景类
       content = content.replace(
         /"answer": "针对系统架构问题：([^"]*何时应该优先使用[^"]*)\n\n详细解答：\n\n架构设计需要权衡各种因素\.\n\n([^"]*)"/g,
         (match, title, prompt) => {
@@ -37,6 +59,7 @@ function fixSpecificAnswers() {
         }
       )
 
+      // 替换：核心概念类
       content = content.replace(
         /"answer": "针对系统架构问题：([^"]*核心是什么[^"]*)\n\n详细解答：\n\n架构设计需要权衡各种因素\.\n\n([^"]*)"/g,
         (match, title, prompt) => {
@@ -45,6 +68,7 @@ function fixSpecificAnswers() {
         }
       )
 
+      // 替换：区别是什么类
       content = content.replace(
         /"answer": "针对系统架构问题：([^"]*区别是什么[^"]*)\n\n详细解答：\n\n架构设计需要权衡各种因素\.\n\n([^"]*)"/g,
         (match, title, prompt) => {
@@ -59,8 +83,13 @@ function fixSpecificAnswers() {
   }
 }
 
+/**
+ * 根据题目标题关键词路由到对应的答案生成函数
+ * @param {string} title - 题目标题
+ * @param {string} prompt - 题目补充说明
+ * @returns {string} 生成的详细答案
+ */
 function generateFixedAnswer(title, prompt) {
-  // 架构设计相关题目
   if (title.includes('常见误区')) {
     return generateCommonPitfallsAnswer(title, prompt)
   } else if (title.includes('何时应该优先使用') || title.includes('何时优先使用')) {
@@ -74,6 +103,10 @@ function generateFixedAnswer(title, prompt) {
   }
 }
 
+/**
+ * 生成"常见误区"类答案
+ * 覆盖：读写分离、模块化单体、SAGA 模式、CQRS 模式
+ */
 function generateCommonPitfallsAnswer(title, prompt) {
   const baseAnswer = `针对系统架构问题：${title}\n\n详细解答：\n\n`
 
@@ -96,6 +129,10 @@ function generateCommonPitfallsAnswer(title, prompt) {
   return `${baseAnswer}该架构模式在实践中需要注意避免一些常见误区。\n\n${prompt ? `\n\n${prompt}` : ''}`
 }
 
+/**
+ * 生成"何时优先使用/适用场景"类答案
+ * 覆盖：读写分离架构、模块化单体、SAGA 模式、CQRS 模式
+ */
 function generateWhenToUseAnswer(title, prompt) {
   const baseAnswer = `针对系统架构问题：${title}\n\n详细解答：\n\n`
 
@@ -118,6 +155,10 @@ function generateWhenToUseAnswer(title, prompt) {
   return `${baseAnswer}该架构模式适用于特定的业务场景和技术条件。\n\n${prompt ? `\n\n${prompt}` : ''}`
 }
 
+/**
+ * 生成"核心是什么"类答案
+ * 覆盖：读写分离架构、模块化单体、SAGA 模式、CQRS 模式
+ */
 function generateCoreConceptAnswer(title, prompt) {
   const baseAnswer = `针对系统架构问题：${title}\n\n详细解答：\n\n`
 
@@ -140,6 +181,10 @@ function generateCoreConceptAnswer(title, prompt) {
   return `${baseAnswer}该架构模式的核心理念需要根据具体技术实现来理解。\n\n${prompt ? `\n\n${prompt}` : ''}`
 }
 
+/**
+ * 生成"区别是什么"类答案
+ * 覆盖：SAGA vs 2PC、CQRS vs CRUD、读写分离 vs 单库、消息幂等 vs 强一致性事务
+ */
 function generateDifferenceAnswer(title, prompt) {
   const baseAnswer = `针对系统架构问题：${title}\n\n详细解答：\n\n`
 
@@ -162,11 +207,14 @@ function generateDifferenceAnswer(title, prompt) {
   return `${baseAnswer}两种架构或模式在设计理念和实现方式上有显著差异。\n\n${prompt ? `\n\n${prompt}` : ''}`
 }
 
+/** 未匹配到具体模式的通用架构答案 */
 function generateGeneralArchitectureAnswer(title, prompt) {
   return `针对系统架构问题：${title}\n\n详细解答：\n\n这是一个架构设计相关的问题，需要根据具体的技术实现和业务场景来分析。\n\n${prompt ? `\n\n${prompt}` : ''}`
 }
 
-// 主函数
+/**
+ * 入口：遍历所有分片文件，替换占位答案为详细解答
+ */
 function main() {
   console.log('Fixing specific answers...')
   fixSpecificAnswers()

@@ -1,3 +1,24 @@
+/**
+ * update-answers.mjs
+ * ===================
+ * 批量更新所有题目分片中的答案为详细版本（精确标题匹配模式）。
+ *
+ * 功能：
+ *   读取 public/questions/chunks/ 下所有分片文件，
+ *   根据题目的精确标题匹配预定义的详细答案模板，替换原有答案。
+ *
+ * 与 update-answers-v2.mjs 的区别：
+ *   - 本脚本使用精确标题匹配（硬编码答案字典）
+ *   - v2 使用关键词模糊匹配（标题 contains 检查）
+ *   - 本脚本的答案更完整、覆盖面更精准
+ *
+ * 使用方式：
+ *   node scripts/update-answers.mjs
+ *
+ * 注意：
+ *   这是一个一次性批量更新脚本。运行前建议备份分片文件。
+ */
+
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -6,7 +27,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.join(__dirname, '..')
 const CHUNK_DIR = path.join(ROOT, 'public', 'questions', 'chunks')
 
-// 读取所有chunk文件
+/**
+ * 读取所有分片文件中的题目
+ * @returns {Array} 所有题目的扁平数组
+ */
 function readAllChunks() {
   const files = fs.readdirSync(CHUNK_DIR)
     .filter(f => f.endsWith('.json'))
@@ -24,16 +48,18 @@ function readAllChunks() {
   return allQuestions
 }
 
-// 模拟生成详细答案的函数
+/**
+ * 根据题目标题关键词路由到对应的答案生成类别
+ * 匹配优先级：JVM > 并发 > 架构 > 数据库 > 网络 > 框架 > 通用
+ * @param {Object} question - 题目对象
+ * @returns {string} 生成的详细答案
+ */
 function generateDetailedAnswer(question) {
   const { title, prompt, tags, id } = question
 
-  // 基于题目ID和内容生成详细答案
-  // 这里提供更详细的答案生成逻辑
-
   let answer = ''
 
-  // 根据题目标题关键词匹配生成答案
+  // 按关键词匹配路由
   if (title.includes('JVM') || title.includes('虚拟机') || title.includes('字节码')) {
     answer = generateJVMAnswer(title, prompt)
   } else if (title.includes('并发') || title.includes('线程') || title.includes('锁') || title.includes('synchronized')) {
@@ -53,6 +79,10 @@ function generateDetailedAnswer(question) {
   return answer
 }
 
+/**
+ * 生成 JVM 相关答案（精确标题匹配）
+ * 覆盖：程序计数器、堆与方法区、栈帧、运行时数据区、一次编写到处运行
+ */
 function generateJVMAnswer(title, prompt) {
   const answers = {
     '程序计数器为什么要线程私有？': `程序计数器（Program Counter Register）是JVM运行时数据区中一块较小的内存空间，它的作用是记录当前线程执行到的字节码指令地址。
@@ -227,6 +257,7 @@ function generateJVMAnswer(title, prompt) {
   return answers[title] || `针对问题"${title}"的详细解答需要根据具体技术细节来分析。${prompt ? `\n\n补充问题：${prompt}` : ''}`
 }
 
+/** 生成并发相关答案（精确标题匹配） */
 function generateConcurrencyAnswer(title, prompt) {
   const answers = {
     'synchronized 与 ReentrantLock 与 不同锁实现 的区别是什么？': `Java中synchronized关键字和ReentrantLock是两种主要的锁实现机制，各有特点和适用场景。
@@ -266,6 +297,7 @@ function generateConcurrencyAnswer(title, prompt) {
   return answers[title] || `并发编程问题"${title}"需要考虑线程安全、性能和正确性。${prompt ? `\n\n补充问题：${prompt}` : ''}`
 }
 
+/** 生成架构相关答案（精确标题匹配） */
 function generateArchitectureAnswer(title, prompt) {
   const answers = {
     '模块化单体 与 微服务 的区别是什么？': `模块化单体和微服务是两种不同的系统架构模式，各有优缺点和适用场景。
@@ -448,23 +480,29 @@ function generateArchitectureAnswer(title, prompt) {
   return answers[title] || `架构设计问题"${title}"需要权衡各种因素。${prompt ? `\n\n补充问题：${prompt}` : ''}`
 }
 
+/** 数据库相关答案（通用） */
 function generateDatabaseAnswer(title, prompt) {
   return `数据库相关问题"${title}"涉及数据存储、查询优化和事务管理等核心概念。${prompt ? `\n\n补充问题：${prompt}` : ''}`
 }
 
+/** 网络相关答案（通用） */
 function generateNetworkAnswer(title, prompt) {
   return `网络编程问题"${title}"涉及协议设计、性能优化和安全考虑。${prompt ? `\n\n补充问题：${prompt}` : ''}`
 }
 
+/** 框架相关答案（通用） */
 function generateFrameworkAnswer(title, prompt) {
   return `框架相关问题"${title}"涉及设计模式、依赖注入和组件生命周期管理。${prompt ? `\n\n补充问题：${prompt}` : ''}`
 }
 
+/** 未匹配到任何类别的通用答案 */
 function generateGeneralAnswer(title, prompt) {
   return `技术问题"${title}"需要根据具体技术栈和应用场景进行分析。${prompt ? `\n\n补充问题：${prompt}` : ''}`
 }
 
-// 更新所有chunk文件
+/**
+ * 遍历所有分片文件，逐一替换每个题目的答案
+ */
 function updateAllChunks() {
   const files = fs.readdirSync(CHUNK_DIR)
     .filter(f => f.endsWith('.json'))
@@ -475,7 +513,7 @@ function updateAllChunks() {
     const content = fs.readFileSync(filePath, 'utf8')
     const data = JSON.parse(content)
 
-    // 更新每个问题的答案
+    // 替换每个题目的答案
     data.questions = data.questions.map(question => ({
       ...question,
       answer: generateDetailedAnswer(question)
@@ -487,7 +525,9 @@ function updateAllChunks() {
   }
 }
 
-// 主函数
+/**
+ * 入口：读取所有题目 → 批量更新答案 → 写回分片文件
+ */
 function main() {
   console.log('Reading all questions...')
   const questions = readAllChunks()

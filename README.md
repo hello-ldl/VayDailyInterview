@@ -124,7 +124,7 @@ export DEEPSEEK_API_KEY=your_deepseek_api_key
 ```
 
 Deepseek 默认使用：
-- 基础地址 `https://api.deepseek.com/anthropic`
+- 基础地址 `https://api.deepseek.com/v1`
 - API 模型 `deepseek-v4-pro`
 - 生成答案要求：清晰分段、段落分明、格式美观
 
@@ -174,9 +174,6 @@ QUESTION_DATE=2026-05-21 npm run gen:daily
 
 ### 已有报告与脚本
 
-- `public/questions/answer-lengths-by-date.md`：按日期列出每题答案长度的表格。
-- `public/questions/answer-lengths-summary-by-date.md`：按日期汇总题目数量、最小/最大/平均答案长度。
-- `public/questions/answer-lengths.json`：所有题目答案长度统计数据。
 - `scripts/`：包含生成与修复题库数据的脚本。
 
 ### 提交与发布
