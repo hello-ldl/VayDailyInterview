@@ -1,0 +1,69 @@
+{
+  "questions": [
+    {
+      "id": "java-331",
+      "date": "2026-05-27",
+      "title": "Java 线程池的监控与动态调优策略",
+      "prompt": "如何监控线上运行的线程池状态？需要关注哪些关键指标？当发现线程池出现问题时，如何进行动态调优？请提供具体的监控方案和调优思路。",
+      "answer": "线程池是 Java 并发编程中的核心组件，对其进行有效监控和调优对于保障系统稳定性至关重要。\n\n监控线程池需要关注以下关键指标：活跃线程数（activeCount），表示当前正在执行任务的线程数量；队列大小（queueSize），反映等待处理的任务积压情况；已完成任务数（completedTaskCount），用于评估吞吐量；拒绝任务数，通过自定义 RejectedExecutionHandler 统计；最大线程数（maximumPoolSize）和核心线程数（corePoolSize），了解当前配置；任务执行时间，包括平均耗时、P95、P99 等百分位数据；线程池状态，判断是否处于 RUNNING、SHUTDOWN 等状态。\n\n监控方案有多种实现方式。第一种是通过 ThreadPoolExecutor 提供的 API 定期采集数据，例如 getActiveCount()、getQueue().size()、getCompletedTaskCount() 等方法，将数据上报到监控系统（如 Prometheus + Grafana）。第二种是使用 Micrometer 库，它提供了内置的 ExecutorServiceMetrics，可以自动暴露线程池指标。第三种是自定义线程池，继承 ThreadPoolExecutor 并重写 beforeExecute、afterExecute、terminated 等方法，在钩子方法中记录任务执行时间和异常情况。第四种是使用 AOP 或装饰器模式包装任务，在任务提交和执行时埋点。\n\n动态调优的思路是根据实时监控数据调整线程池参数。核心线程数和最大线程数可以通过反射修改，但需要注意线程数的增加不会立即生效，只有在新任务提交且队列满时才会创建新线程。队列容量也可以动态调整，但缩小队列可能导致任务被拒绝。更安全的做法是采用自适应线程池，根据系统负载自动调整参数。例如，可以根据 CPU 使用率、响应时间、队列长度等指标，通过算法计算最优线程数。\n\n调优原则包括：CPU 密集型任务适合较小的线程数（CPU 核数 + 1），IO 密集型任务适合较大的线程数（CPU 核数 * 2 或更多）；队列不宜过大，避免内存溢出和响应延迟；设置合理的超时时间，避免线程长时间阻塞；使用有界队列而非无界队列，防止任务无限堆积；根据业务特点选择合适的拒绝策略。此外，应该为不同的业务场景使用独立的线程池，避免相互影响。定期进行压力测试，找到最佳参数组合，并建立告警机制，当线程池指标异常时及时通知运维人员。",
+      "tags": [
+        "并发编程",
+        "线程池",
+        "监控",
+        "性能调优"
+      ]
+    },
+    {
+      "id": "java-332",
+      "date": "2026-05-27",
+      "title": "Spring Cloud Gateway 的核心概念与过滤器链机制",
+      "prompt": "请介绍 Spring Cloud Gateway 的架构设计和核心组件（Route、Predicate、Filter）。详细说明全局过滤器和网关过滤器的区别，以及过滤器链的执行顺序是如何确定的？",
+      "answer": "Spring Cloud Gateway 是 Spring 官方推出的基于 Spring Boot 2.x 和 Spring WebFlux 的 API 网关项目，旨在替代 Zuul 1.x，提供更高性能和更灵活的网关解决方案。\n\nGateway 的核心架构基于 Reactor 模型，采用非阻塞异步处理方式，能够处理高并发请求。其三大核心组件是：Route（路由）、Predicate（断言）和 Filter（过滤器）。Route 是网关的基本构建块，由 ID、目标 URI、断言集合和过滤器集合组成。当请求满足断言条件时，路由会被匹配，请求将被转发到目标 URI。Predicate 是 Java 8 引入的函数式接口，用于判断请求是否符合路由规则。Gateway 内置了多种断言工厂，如 Path（路径匹配）、Method（HTTP 方法）、Header（请求头）、Query（查询参数）、Host（主机名）、Between（时间范围）等，也支持自定义断言。Filter 用于在请求转发前后进行修改，可以分为局部过滤器（GatewayFilter，作用于特定路由）和全局过滤器（GlobalFilter，作用于所有路由）。\n\n过滤器链的执行顺序是 Gateway 的关键机制。每个过滤器都有一个 order 值，数值越小优先级越高。Gateway 将过滤器分为两个阶段：pre 阶段（请求转发前）和 post 阶段（响应返回后）。pre 阶段的过滤器按照 order 从小到大执行，post 阶段则按相反顺序执行。这种设计类似于 Servlet 规范中的 FilterChain，形成了一个责任链模式。\n\n全局过滤器和网关过滤器的主要区别在于作用范围和注册方式。GlobalFilter 对所有路由生效，通过实现 GlobalFilter 接口并注册为 Bean 即可。GatewayFilter 只对特定路由生效，需要在路由配置中显式指定。GlobalFilter 的 order 通过 @Order 注解或实现 Ordered 接口指定，GatewayFilter 的 order 在配置文件中定义。常见的全局过滤器包括：ForwardRoutingFilter（转发路由）、NettyRoutingFilter（HTTP 客户端路由）、LoadBalancerClientFilter（负载均衡）、AdaptCachedBodyGlobalFilter（缓存请求体）等。\n\n自定义过滤器的步骤是：实现 GatewayFilter 或 GlobalFilter 接口，在 filter 方法中编写业务逻辑，通过 chain.filter(exchange) 继续执行后续过滤器。可以在 pre 阶段修改请求（添加请求头、鉴权、限流等），在 post 阶段修改响应（添加响应头、日志记录、性能监控等）。需要注意的是，过滤器中应避免阻塞操作，充分利用 WebFlux 的响应式特性。通过合理配置路由、断言和过滤器，Gateway 可以实现路由转发、负载均衡、鉴权认证、限流熔断、日志审计等功能，是微服务架构中的重要组件。",
+      "tags": [
+        "Spring Cloud",
+        "Gateway",
+        "微服务",
+        "过滤器链"
+      ]
+    },
+    {
+      "id": "java-333",
+      "date": "2026-05-27",
+      "title": "MySQL 慢查询优化实战与执行计划分析",
+      "prompt": "如何定位和分析 MySQL 慢查询？EXPLAIN 命令的输出字段分别代表什么含义？如何通过执行计划判断查询是否存在性能问题？请提供具体的优化案例。",
+      "answer": "慢查询优化是数据库性能调优的重要环节，需要系统性地进行分析和问题定位。\n\n定位慢查询的第一步是开启慢查询日志。通过设置 slow_query_log = ON、long_query_time = 1（单位秒，可根据实际情况调整）、slow_query_log_file 指定日志文件路径，MySQL 会记录执行时间超过阈值的 SQL。也可以使用 performance_schema 或 sys schema 实时查询慢 SQL。此外，pt-query-digest 工具可以分析慢查询日志，统计出现频率高、耗时长的 SQL，帮助确定优化优先级。\n\nEXPLAIN 命令是分析 SQL 执行计划的核心工具。其输出包含多个关键字段：id 表示查询的序列号，数字越大优先级越高，相同数字表示联合查询；select_type 表示查询类型，SIMPLE 是简单查询，PRIMARY 是外层查询，SUBQUERY 是子查询，DERIVED 是派生表，UNION 是联合查询；table 表示访问的表名；type 表示访问类型，性能从好到坏依次是 system > const > eq_ref > ref > range > index > ALL，ALL 表示全表扫描，应尽量避免；possible_keys 表示可能使用的索引；key 表示实际使用的索引；key_len 表示索引使用的字节数，越短越好；ref 表示索引查找的条件；rows 表示预估扫描的行数，越少越好；Extra 包含额外信息，Using index 表示覆盖索引，Using where 表示使用了 WHERE 过滤，Using temporary 表示使用了临时表，Using filesort 表示需要排序，后两者通常意味着性能问题。\n\n通过执行计划判断性能问题的方法是：检查 type 是否为 ALL 或 index，如果是则需要添加索引；检查 rows 是否过大，如果扫描行数过多说明索引效率低；检查 Extra 是否出现 Using temporary 或 Using filesort，如果出现则需要优化查询或添加合适的索引；检查 key_len 是否过长，联合索引中是否只使用了部分列。\n\n优化案例：假设有一个订单表 orders，查询语句为 SELECT * FROM orders WHERE user_id = 100 AND status = 1 ORDER BY create_time DESC LIMIT 10。初始执行计划显示 type = ALL，rows = 1000000，Extra = Using where; Using filesort。优化步骤：首先添加联合索引 idx_user_status_time (user_id, status, create_time)，这样可以使用索引进行过滤和排序。优化后 type = ref，rows = 100，Extra = Using index condition。如果还需要进一步优化，可以考虑覆盖索引，只查询需要的字段而非 SELECT *，避免回表。对于分页查询，如果 offset 很大，可以使用延迟关联：SELECT o.* FROM orders o INNER JOIN (SELECT id FROM orders WHERE user_id = 100 AND status = 1 ORDER BY create_time DESC LIMIT 10 OFFSET 1000) t ON o.id = t.id。其他优化技巧包括：避免 SELECT *，减少回表；使用覆盖索引；避免在索引列上使用函数；合理使用联合索引的最左前缀；对于大表考虑分区或分表；定期分析和更新统计信息。通过系统性的分析和优化，可以将慢查询的性能提升数个数量级。",
+      "tags": [
+        "数据库",
+        "MySQL",
+        "慢查询优化",
+        "执行计划"
+      ]
+    },
+    {
+      "id": "java-334",
+      "date": "2026-05-27",
+      "title": "CompletableFuture 异步编程模型与最佳实践",
+      "prompt": "请介绍 CompletableFuture 的核心 API 和使用场景。如何组合多个异步任务？如何处理异常？在使用 CompletableFuture 时有哪些常见的陷阱和最佳实践？",
+      "answer": "CompletableFuture 是 Java 8 引入的异步编程工具，实现了 CompletionStage 接口，提供了强大的函数式编程能力，可以优雅地处理异步任务和结果组合。\n\nCompletableFuture 的核心思想是将异步任务表示为一个阶段（Stage），多个阶段可以串联、并联或混合组合。创建异步任务的方法包括：supplyAsync（有返回值）和 runAsync（无返回值），它们接受 Supplier 或 Runnable 函数，并可选地指定 Executor。如果不指定 Executor，默认使用 ForkJoinPool.commonPool()。\n\n组合异步任务的方式非常丰富。串行组合使用 thenApply（转换结果）、thenAccept（消费结果）、thenRun（不关心结果），这些方法在前一阶段完成后执行。并行组合使用 thenCombine（合并两个独立任务的结果）、allOf（等待所有任务完成）、anyOf（任一任务完成即返回）。异常处理使用 exceptionally（提供降级值）、handle（同时处理结果和异常）、whenComplete（无论成功失败都执行）。还可以使用 thenCompose 实现扁平化链接，避免嵌套的 CompletableFuture。\n\n常见的使用场景包括：并行调用多个远程服务并合并结果；异步执行 IO 密集型任务而不阻塞主线程；实现响应式编程风格的数据流处理；将同步代码改造为异步以提高吞吐量。\n\n使用 CompletableFuture 时的常见陷阱和最佳实践包括：\n\n第一，务必指定自定义线程池。默认的 ForkJoinPool.commonPool() 是所有 CompletableFuture 共享的，如果一个任务阻塞会导致其他任务也受影响。应该根据业务特点创建专用的线程池，CPU 密集型使用较小线程数，IO 密集型使用较大线程数。\n\n第二，正确处理异常。异步任务的异常不会抛出，而是封装在 CompletableFuture 中。必须通过 exceptionally、handle 或 join/get 时的 try-catch 来处理，否则异常会被吞掉，导致问题难以排查。\n\n第三，避免阻塞调用。join() 和 get() 方法会阻塞当前线程，应尽量使用 thenApply 等非阻塞方式组合任务。如果必须阻塞，应设置超时时间，避免无限等待。\n\n第四，注意上下文传递。在 Web 应用中，ThreadLocal 变量（如用户信息、事务上下文）在异步线程中不可见。需要通过手动传递或使用 InheritableThreadLocal 来解决。\n\n第五，控制并发度。当有大量异步任务时，应使用信号量或批量提交来控制并发数量，避免资源耗尽。\n\n第六，合理选择 API。thenApply 用于转换，thenAccept 用于消费，thenRun 用于执行副作用，thenCompose 用于扁平化，thenCombine 用于合并。选择正确的 API 可以让代码更清晰。\n\n示例代码展示典型用法：CompletableFuture<String> future1 = CompletableFuture.supplyAsync(() -> service1.getData(), executor); CompletableFuture<String> future2 = CompletableFuture.supplyAsync(() -> service2.getData(), executor); CompletableFuture<String> combined = future1.thenCombine(future2, (r1, r2) -> r1 + r2); combined.thenAccept(result -> System.out.println(result)).exceptionally(ex -> { log.error(\"Error\", ex); return \"default\"; }); 通过合理使用 CompletableFuture，可以显著提升应用的并发性能和代码可读性。",
+      "tags": [
+        "Java 8",
+        "异步编程",
+        "CompletableFuture",
+        "并发编程"
+      ]
+    },
+    {
+      "id": "java-335",
+      "date": "2026-05-27",
+      "title": "Redis 持久化机制 RDB 与 AOF 对比及生产环境配置",
+      "prompt": "请详细说明 Redis 的两种持久化机制 RDB 和 AOF 的工作原理、优缺点。在生产环境中应该如何配置持久化策略？Redis 重启时如何恢复数据？",
+      "answer": "Redis 提供了两种持久化机制：RDB（Redis Database）快照和 AOF（Append Only File）追加日志，它们各有特点，适用于不同场景。\n\nRDB 持久化通过在指定时间间隔内生成数据集的时间点快照来实现。触发方式有三种：手动执行 SAVE 或 BGSAVE 命令；配置文件中的 save 规则自动触发（如 save 900 1 表示 900 秒内至少 1 个键变化则触发）；执行 FLUSHALL 命令时。BGSAVE 会 fork 一个子进程，子进程将内存数据写入临时 RDB 文件，完成后替换旧文件。由于 fork 是写时复制（Copy-On-Write），父进程可以继续处理请求，但大量写操作会导致内存占用翻倍。\n\nRDB 的优点是：文件紧凑，适合备份和灾难恢复；加载速度快，恢复大数据集时比 AOF 快；对性能影响小，fork 后父进程无需参与持久化。缺点是：数据安全性较低，两次快照之间的数据会丢失；fork 过程可能耗时较长，数据集大时会影响服务可用性。\n\nAOF 持久化通过记录服务器接收到的每个写命令来实现。每次写操作都会追加到 AOF 文件末尾。AOF 提供了三种刷盘策略：always（每次写操作都同步到磁盘，最安全但性能最差）、everysec（每秒同步一次，推荐配置，性能和安全性平衡）、no（由操作系统决定何时同步，性能最好但安全性最低）。AOF 文件会不断增长，Redis 提供了 AOF 重写机制：后台启动子进程，遍历当前数据集生成新的 AOF 文件，用最小命令集重建数据，然后替换旧文件。\n\nAOF 的优点是：数据安全性高，最多丢失一秒的数据；文件易于理解和修复，即使误执行 FLUSHALL 也可以通过删除最后一条命令来恢复。缺点是：文件体积通常比 RDB 大；恢复速度慢于 RDB；在高写入负载下性能低于 RDB。\n\n生产环境的最佳配置是同时启用 RDB 和 AOF。Redis 重启时会优先使用 AOF 恢复数据，因为 AOF 更完整。配置建议如下：\n\nRDB 配置：save 900 1、save 300 10、save 60 10000，根据业务重要性调整频率；dbfilename dump.rdb；dir 指定存储目录。\n\nAOF 配置：appendonly yes；appendfsync everysec；auto-aof-rewrite-percentage 100（AOF 文件大小增长 100% 时触发重写）；auto-aof-rewrite-min-size 64mb（AOF 文件至少 64MB 才重写）。\n\n此外，还应配置：maxmemory-policy 设置内存淘汰策略；requirepass 设置密码；bind 限制访问 IP；rename-command 禁用危险命令如 FLUSHALL、CONFIG。\n\n监控和维护方面：定期检查 RDB 和 AOF 文件大小；监控 bgrewriteaof_in_progress 和 rdb_bgsave_in_progress 状态；备份持久化文件到远程存储；测试恢复流程，确保数据可恢复。对于极高可用性要求的场景，还应结合主从复制和哨兵模式或集群模式，实现数据冗余和故障自动切换。通过合理配置持久化策略，可以在数据安全性和性能之间找到最佳平衡点。",
+      "tags": [
+        "Redis",
+        "持久化",
+        "RDB",
+        "AOF"
+      ]
+    }
+  ]
+}

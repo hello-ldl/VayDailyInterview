@@ -1,0 +1,69 @@
+{
+  "questions": [
+    {
+      "id": "java-321",
+      "date": "2026-05-25",
+      "title": "Java 8 Stream API 的核心概念与性能优化",
+      "prompt": "请解释 Java 8 Stream API 的工作原理，包括中间操作和终端操作的区别。Stream 在什么情况下使用并行流能提升性能？使用时需要注意哪些陷阱？",
+      "answer": "Java 8 引入的 Stream API 是一种用于处理集合数据的函数式编程工具。Stream 代表数据流，它不是数据结构，不存储数据，而是通过一系列操作对数据源进行计算。Stream 的操作分为中间操作和终端操作两类。\n\n中间操作是惰性求值的，它们返回一个新的 Stream，可以链式调用。常见的中间操作包括 filter（过滤）、map（映射）、sorted（排序）、distinct（去重）、limit（限制数量）等。这些操作不会立即执行，而是等到终端操作触发时才会真正处理数据。这种设计允许 JVM 对操作进行优化，例如将多个操作合并为一次遍历。\n\n终端操作会触发 Stream 的实际计算，并产生结果或副作用。常见的终端操作有 forEach（遍历）、collect（收集）、reduce（归约）、count（计数）、anyMatch（匹配）等。终端操作执行后，Stream 就被消耗完毕，不能再次使用。\n\n并行流通过 fork/join 框架将数据分割成多个片段，在不同的线程中并行处理，最后合并结果。在以下场景使用并行流能显著提升性能：数据量较大（通常超过 10000 个元素）、每个元素的处理耗时较长、CPU 密集型计算、数据源支持高效分割（如 ArrayList、数组）。但在以下情况应避免使用并行流：数据量较小、I/O 密集型操作、需要维护顺序的场景、共享可变状态的操作。\n\n使用并行流时的常见陷阱包括：非线程安全的操作会导致数据错误，例如在 forEach 中修改外部共享变量；并行流的开销可能超过收益，特别是对于简单操作或小数据集；某些操作如 limit、findFirst 在并行流中效率较低；并行流使用的线程池是 ForkJoinPool.commonPool()，默认线程数为 CPU 核心数减一，可能与应用的线程池配置冲突。因此，使用并行流时应谨慎评估性能收益，并通过基准测试验证实际效果。",
+      "tags": [
+        "Java 8",
+        "Stream API",
+        "函数式编程",
+        "性能优化"
+      ]
+    },
+    {
+      "id": "java-322",
+      "date": "2026-05-25",
+      "title": "分布式锁的实现方案与 Redis Redlock 算法",
+      "prompt": "请对比基于数据库、ZooKeeper 和 Redis 实现分布式锁的优缺点。详细说明 Redis Redlock 算法的原理，以及它在生产环境中可能存在的问题和替代方案。",
+      "answer": "分布式锁是在分布式系统中协调多个节点对共享资源访问的机制。不同实现方案各有特点。\n\n基于数据库的分布式锁通过在表中创建唯一约束来实现。优点是简单易理解，不需要额外组件；缺点是性能较差，每次加锁都需要数据库操作，存在单点故障风险，且无法设置自动过期，可能导致死锁。适合并发量不高、对可靠性要求较高的场景。\n\n基于 ZooKeeper 的分布式锁利用其临时顺序节点特性实现。客户端创建临时顺序节点，序号最小的获得锁。优点是可靠性高，支持 Watch 机制监听锁释放，不存在死锁问题；缺点是需要维护 ZooKeeper 集群，性能不如 Redis，且实现复杂度较高。适合对一致性要求严格的场景。\n\n基于 Redis 的分布式锁使用 SETNX（SET if Not eXists）命令实现。优点是性能极高，实现简单；缺点是 Redis 是主从架构，主节点宕机可能导致锁丢失，且需要处理锁超时和续期问题。\n\nRedis Redlock 算法由 Redis 作者提出，旨在解决主从切换导致的锁安全问题。它要求在 N 个独立的 Redis 实例上依次尝试获取锁，只有在超过半数（N/2+1）实例成功且总耗时小于锁有效期时，才认为加锁成功。解锁时需要向所有实例发送删除命令。Redlock 的优点是不依赖单一 Redis 实例，提高了可用性。\n\n然而，Redlock 在生产环境中存在争议和问题。首先，它依赖系统时钟，如果某个节点时钟跳跃，可能导致锁提前失效。其次，网络延迟可能使加锁时间超过预期，导致锁实际上未被正确获取。再者，GC 停顿可能导致客户端持有锁的时间超过预期，造成多个客户端同时持有锁。Martin Kleppmann 和 Antirez 曾就此展开著名辩论。\n\n替代方案包括：使用 ZooKeeper 或 etcd 等强一致性存储实现分布式锁；采用 Lease 机制结合租约续约；使用数据库的唯一索引配合乐观锁；或者接受最终一致性，使用业务层面的幂等性设计来避免重复执行。选择方案时应根据业务对一致性、性能和复杂度的要求进行权衡。",
+      "tags": [
+        "分布式系统",
+        "分布式锁",
+        "Redis",
+        "Redlock"
+      ]
+    },
+    {
+      "id": "java-323",
+      "date": "2026-05-25",
+      "title": "Spring Boot 自动装配原理与自定义 Starter",
+      "prompt": "请详细解释 Spring Boot 自动装配的工作机制，包括 @EnableAutoConfiguration、spring.factories 文件的作用。如何开发一个自定义的 Spring Boot Starter？",
+      "answer": "Spring Boot 自动装配是其核心特性之一，能够根据 classpath 中的依赖自动配置 Bean，大大简化了 Spring 应用的配置工作。\n\n自动装配的入口是 @SpringBootApplication 注解，它是一个组合注解，包含了 @EnableAutoConfiguration。@EnableAutoConfiguration 通过 @Import 导入了 AutoConfigurationImportSelector 类，该类负责加载所有自动配置类。具体流程是：Spring Boot 启动时会扫描 classpath 下所有 jar 包中的 META-INF/spring.factories 文件（Spring Boot 2.7 之后改为 META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports），读取其中配置的自动配置类。然后根据 @Conditional 系列注解的条件判断是否满足装配条件，只有条件满足的配置类才会被注册到 Spring 容器中。\n\n常见的条件注解包括：@ConditionalOnClass（当 classpath 中存在指定类时生效）、@ConditionalOnMissingBean（当容器中不存在指定 Bean 时生效）、@ConditionalOnProperty（当配置文件中有指定属性时生效）、@ConditionalOnWebApplication（当应用是 Web 应用时生效）等。这些条件使得自动配置具有高度的灵活性。\n\n开发自定义 Spring Boot Starter 的步骤如下：首先创建一个 Maven 或 Gradle 项目，命名为 xxx-spring-boot-starter。然后创建自动配置类，使用 @Configuration 标注，并通过 @Bean 方法定义需要注册的 Bean。在配置类上使用 @Conditional 注解控制装配条件。接着创建 properties 配置类，使用 @ConfigurationProperties 绑定配置文件中的属性值，提供类型安全的配置访问。然后在 resources/META-INF/ 目录下创建 spring.factories 文件（或 Spring Boot 2.7+ 的 imports 文件），将自动配置类注册进去。最后，为了方便使用者，可以创建一个 starter 模块，仅包含依赖声明，将 autoconfigure 模块作为依赖引入。\n\n最佳实践包括：提供默认配置，让用户可以快速上手；使用 @Conditional 确保不会覆盖用户自定义的 Bean；提供清晰的文档和示例；遵循 Spring Boot 的命名规范。通过自定义 Starter，可以将通用功能封装成可复用的组件，提高开发效率。",
+      "tags": [
+        "Spring Boot",
+        "自动装配",
+        "Starter",
+        "条件注解"
+      ]
+    },
+    {
+      "id": "java-324",
+      "date": "2026-05-25",
+      "title": "MySQL 事务隔离级别与 MVCC 实现原理",
+      "prompt": "请说明 MySQL 的四种事务隔离级别及其解决的问题（脏读、不可重复读、幻读）。详细解释 InnoDB 如何通过 MVCC（多版本并发控制）实现可重复读隔离级别。",
+      "answer": "SQL 标准定义了四种事务隔离级别，从低到高分别是：读未提交（Read Uncommitted）、读已提交（Read Committed）、可重复读（Repeatable Read）和串行化（Serializable）。\n\n读未提交是最低的隔离级别，允许一个事务读取另一个事务尚未提交的数据，会产生脏读问题。读已提交保证一个事务只能读取其他事务已经提交的数据，解决了脏读，但会出现不可重复读问题，即在同一事务中多次读取同一数据可能得到不同结果。可重复读保证在同一事务中多次读取同一数据的结果一致，解决了不可重复读，但在 MySQL 中通过 MVCC 也基本解决了幻读问题。串行化是最高的隔离级别，强制事务串行执行，完全避免了并发问题，但性能最差。\n\nInnoDB 引擎通过 MVCC（Multi-Version Concurrency Control）实现可重复读隔离级别。MVCC 的核心思想是为每行数据维护多个版本，每个事务看到的是数据在某个时间点的快照，而不是最新值。这样读操作不需要加锁，写操作也不会阻塞读操作，大大提高了并发性能。\n\nMVCC 的实现依赖于三个关键组件：隐藏列、Undo Log 和 Read View。InnoDB 在每行记录中添加了两个隐藏列：DB_TRX_ID 记录最后一次修改该行的事务 ID，DB_ROLL_PTR 指向该行上一个版本的 Undo Log 指针。当事务修改数据时，InnoDB 会将旧版本数据写入 Undo Log，并通过回滚指针形成版本链。\n\nRead View 是事务启动时创建的视图，包含当前活跃事务列表、最小活跃事务 ID、最大事务 ID 等信息。当事务读取数据时，会根据 Read View 判断哪个版本的数据对该事务可见。判断规则是：如果数据版本的 DB_TRX_ID 小于 Read View 的最小活跃事务 ID，说明该版本在事务启动前已提交，可见；如果 DB_TRX_ID 等于当前事务 ID，说明是当前事务修改的，可见；如果 DB_TRX_ID 在活跃事务列表中，说明修改该版本的事务还未提交，不可见，需要沿着版本链继续查找；如果 DB_TRX_ID 大于 Read View 的最大事务 ID，说明该版本在事务启动后才产生，不可见。\n\n通过这种方式，可重复读隔离级别下的事务在整个生命周期内看到的数据都是一致的，即使其他事务在此期间修改并提交了数据，当前事务也看不到这些变化。对于快照读（普通 SELECT），MVCC 提供了非锁定的一致性读取；对于当前读（SELECT ... FOR UPDATE、UPDATE、DELETE），则通过 next-key 锁（记录锁 + 间隙锁）来防止幻读。",
+      "tags": [
+        "数据库",
+        "MySQL",
+        "事务隔离",
+        "MVCC"
+      ]
+    },
+    {
+      "id": "java-325",
+      "date": "2026-05-25",
+      "title": "ReentrantLock 与 synchronized 的区别及适用场景",
+      "prompt": "请对比 ReentrantLock 和 synchronized 关键字的异同点，包括实现机制、功能特性、性能表现等方面。在实际开发中应该如何选择？",
+      "answer": "ReentrantLock 和 synchronized 都是 Java 中实现互斥同步的机制，但它们在设计和使用上有显著差异。\n\n从实现机制来看，synchronized 是 JVM 层面的关键字，由 JVM 直接支持，通过 monitorenter 和 monitorexit 字节码指令实现。JVM 对其进行了大量优化，包括偏向锁、轻量级锁（自旋锁）和重量级锁的锁升级机制。ReentrantLock 是 JDK 层面实现的类，基于 AQS（AbstractQueuedSynchronizer）框架，通过 CAS 操作和 volatile 变量实现，属于 API 级别的锁。\n\n在功能特性方面，synchronized 使用简单，无需手动释放锁，由 JVM 自动管理，不会出现忘记解锁导致的死锁问题。但它缺乏灵活性，不支持尝试获取锁、超时获取锁、中断响应等功能。ReentrantLock 提供了更丰富的功能：可以尝试非阻塞地获取锁（tryLock），可以设置超时时间获取锁（tryLock(long timeout, TimeUnit unit)），可以响应中断（lockInterruptibly），支持公平锁和非公平锁的选择（构造函数参数），还可以通过 Condition 对象实现精确的线程唤醒（await/signal），而 synchronized 只能通过 wait/notify 随机唤醒。\n\n性能表现方面，在 JDK 1.6 之前，synchronized 的性能明显低于 ReentrantLock，因为 synchronized 在未优化时直接进入重量级锁状态，涉及用户态和内核态的切换。但从 JDK 1.6 开始，JVM 引入了锁优化技术，使得 synchronized 在大多数场景下的性能与 ReentrantLock 相当，甚至在低竞争场景下更好。在高竞争场景下，ReentrantLock 由于可以自选是否使用公平锁，可能表现更优。\n\n选择建议：优先使用 synchronized，因为它代码简洁、不易出错，且 JVM 持续优化。只有在需要以下特性时才考虑 ReentrantLock：需要尝试获取锁或超时获取锁、需要响应中断、需要公平锁、需要在不同作用域加锁和解锁、需要使用多个条件变量进行精确线程通信。需要注意的是，使用 ReentrantLock 必须在 finally 块中释放锁，否则可能导致死锁。此外，ReentrantLock 不支持 JVM 的锁优化，因此在低竞争场景下可能不如 synchronized 高效。",
+      "tags": [
+        "并发编程",
+        "ReentrantLock",
+        "synchronized",
+        "锁机制"
+      ]
+    }
+  ]
+}
