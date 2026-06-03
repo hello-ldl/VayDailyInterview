@@ -1,0 +1,69 @@
+{
+  "questions": [
+    {
+      "id": "java-351",
+      "date": "2026-05-29",
+      "title": "请解释Java中volatile关键字的作用及其与synchronized的区别",
+      "prompt": "在多线程编程中，volatile常用于保证可见性和禁止指令重排序，请详细说明其原理，并与synchronized在原子性、性能和使用场景上进行比较。",
+      "answer": "volatile是Java中用于修饰变量的轻量级同步机制，主要提供两大保证。第一是可见性：当一个线程修改了volatile变量的值，新值会立即被刷新到主内存中，同时其他线程读取该变量时会强制从主内存重新获取，从而避免使用线程工作内存中的过期数据。第二是禁止指令重排序：编译器和处理器为了提高性能可能会对指令进行重排，而volatile通过内存屏障（Memory Barrier）禁止指令在其前后的特定重排序，确保写操作之前的指令不会重排到写之后，读操作之后的指令不会重排到读之前。volatile与synchronized的区别体现在多个方面。synchronized通过锁机制既能保证可见性又能保证原子性（即多个操作被视为一个不可分割的整体），而volatile仅保证对单次读/写的原子性，像i++这类复合操作无法保证原子性。在性能上，volatile由于不涉及线程阻塞和上下文切换，开销远小于synchronized。使用场景上，volatile适合作为状态标记或双重检查锁定中的单例对象，而synchronized适用于需要互斥访问的临界区。正确理解它们有助于写出高效且安全的并发程序。",
+      "tags": [
+        "多线程",
+        "volatile",
+        "并发编程",
+        "Java基础"
+      ]
+    },
+    {
+      "id": "java-352",
+      "date": "2026-05-29",
+      "title": "Java中HashMap的实现原理，以及JDK 8做了哪些优化",
+      "prompt": "从底层数据结构、哈希冲突解决方式、扩容机制以及put/get流程等方面进行阐述，并重点说明JDK 8引入的红黑树优化。",
+      "answer": "HashMap是基于哈希表实现的Map接口，在JDK 8中底层结构从“数组+链表”升级为“数组+链表+红黑树”。当插入键值对时，先计算key的hashCode并经过扰动函数处理得到桶下标，若该位置为空则直接放入；若发生哈希冲突，则以链表形式追加到已有节点之后。在JDK 8之前，最坏情况下链表长度可能变得很长，导致查询时间复杂度退化为O(n)。JDK 8引入红黑树优化：当链表长度超过阈值（默认8）且数组长度大于64时，会将链表转换为红黑树，使查找复杂度降至O(log n)；当树节点数减少到6以下时，又会退化为链表，以平衡内存开销。扩容机制同样得到改进：默认容量为16，负载因子0.75；当元素数量超过容量*负载因子时，数组会扩容为原来的两倍，并重新计算每个节点的新位置。JDK 8在扩容时不再需要重新计算哈希值，而是通过判断新哈希的高位是0还是1来直接分配原位置或原位置+旧容量，减少哈希计算开销。put和get操作先定位桶位，再遍历链表或树，最终equals比较确定目标节点。这些优化显著提升了HashMap在高冲突和大数据量场景下的性能。",
+      "tags": [
+        "集合",
+        "HashMap",
+        "JDK8",
+        "数据结构"
+      ]
+    },
+    {
+      "id": "java-353",
+      "date": "2026-05-29",
+      "title": "谈谈Java类加载机制，包括双亲委派模型及其破坏场景",
+      "prompt": "请描述类加载的五个阶段，解释双亲委派模型的工作原理与好处，并举例说明哪些场景下可能会破坏该模型（如Tomcat、SPI）。",
+      "answer": "Java类加载机制将编译后的.class文件加载到JVM中，整个过程分为加载、验证、准备、解析和初始化五个阶段。加载阶段由类加载器读取字节流并生成Class对象；验证阶段确保字节码安全合规；准备阶段为静态变量分配内存并赋默认值；解析阶段将符号引用替换为直接引用；初始化阶段执行静态代码块和显式赋值。双亲委派模型要求类加载器在收到加载请求时，优先委托给父加载器尝试加载，只有父加载器反馈无法完成时才由子加载器自行加载。这种机制的好处是避免类的重复加载，保护核心API不被篡改，例如java.lang.Object总由启动类加载器加载，保证了Java类型体系的安全性。然而在某些架构中需要破坏该模型。例如Tomcat通过自定义WebAppClassLoader打破双亲委派，优先加载Web应用的类，以实现应用间隔离，并允许不同版本库共存。另一个经典场景是SPI（Service Provider Interface）：核心库如JDBC的ServiceLoader需要加载第三方驱动实现，启动类加载器无法直接加载这些外部类，于是通过线程上下文类加载器打破委派，让父加载器请求子加载器加载具体实现。理解这些破坏场景有助于应对复杂的类加载问题，避免奇怪的ClassNotFoundException或NoClassDefFoundError。",
+      "tags": [
+        "JVM",
+        "类加载",
+        "双亲委派",
+        "SPI"
+      ]
+    },
+    {
+      "id": "java-354",
+      "date": "2026-05-29",
+      "title": "Spring框架中Bean的生命周期是怎样的",
+      "prompt": "详细描述从Bean定义被加载到IoC容器，再到创建、初始化、使用直至销毁的完整生命周期，并说明BeanPostProcessor等扩展点如何介入。",
+      "answer": "Spring IoC容器管理Bean的完整生命周期，大致分为定义、实例化、属性注入、初始化、使用和销毁几个阶段。首先，容器通过BeanDefinitionReader加载XML或注解定义，解析为BeanDefinition并注册到BeanDefinitionRegistry。随后，在getBean触发或容器启动时，通过反射创建Bean实例（调用构造方法或工厂方法）。实例化后，容器根据BeanDefinition进行属性填充（依赖注入），包括自动装配或显式配置的属性。注入完成后，如果Bean实现了一系列Aware接口（如BeanNameAware、BeanFactoryAware、ApplicationContextAware），容器会依次回调这些方法注入对应资源。接下来进入初始化前扩展点：BeanPostProcessor的postProcessBeforeInitialization方法会针对每个Bean进行调用。然后，如果Bean实现了InitializingBean接口，会执行afterPropertiesSet方法；或者通过init-method指定自定义初始化方法，二者都会在此阶段被触发。初始化后，BeanPostProcessor的postProcessAfterInitialization方法再次被调用，可用于创建代理对象（例如AOP实现）。此时Bean已处于就绪状态，可以被应用程序使用。当容器关闭时，如果Bean实现了DisposableBean接口，则调用destroy方法；若配置了destroy-method，同样会执行，完成资源释放。整个生命周期中，BeanPostProcessor多次介入，为框架提供了强大的扩展能力，是Spring灵活性和AOP机制的基础。",
+      "tags": [
+        "Spring",
+        "Bean生命周期",
+        "依赖注入",
+        "AOP"
+      ]
+    },
+    {
+      "id": "java-355",
+      "date": "2026-05-29",
+      "title": "Java中的异常体系，Error和Exception的区别，以及如何自定义异常",
+      "prompt": "请解释受检异常与非受检异常的分类，说明Error与Exception的设计意图，并提供一个自定义异常的最佳实践示例（需包含两个构造方法）。",
+      "answer": "Java异常体系的根类为Throwable，其下分为Error和Exception两个主要分支。Error表示系统级严重错误，例如OutOfMemoryError、StackOverflowError，通常是JVM无法处理或无法恢复的错误，应用程序不应尝试捕获处理，而应让其终止或记录日志后退出。Exception分为受检异常（Checked Exception）和非受检异常（Unchecked Exception）。受检异常是Exception的子类（除RuntimeException外），如IOException、SQLException，编译器强制要求调用方必须通过try-catch捕获或在方法签名中声明抛出，主要表示程序外部错误且可预期恢复的情况。非受检异常包括RuntimeException及其子类，如NullPointerException、IllegalArgumentException，编译器不要求强制处理，通常反映程序设计或逻辑错误，应尽量通过编码避免。自定义异常有助于更精确地描述业务错误。最佳实践是继承自RuntimeException（遇可恢复场景也可继承Exception），提供至少两个构造方法：一个接受错误消息字符串，另一个接受错误消息和异常原因（Throwable cause），以便保持异常链。例如定义public class BusinessException extends RuntimeException { public BusinessException(String message) { super(message); } public BusinessException(String message, Throwable cause) { super(message, cause); } }，这样既方便抛出清晰错误信息，也保留原始异常堆栈，利于问题排查。合理使用异常体系能提升代码健壮性和可维护性。",
+      "tags": [
+        "异常处理",
+        "自定义异常",
+        "Java基础",
+        "受检异常"
+      ]
+    }
+  ]
+}
