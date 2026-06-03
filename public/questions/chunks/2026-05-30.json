@@ -1,0 +1,69 @@
+{
+  "questions": [
+    {
+      "id": "java-346",
+      "date": "2026-05-30",
+      "title": "Java 17 中的 Sealed Classes 如何限制继承层次？",
+      "prompt": "请说明 Sealed Classes（密封类）的语法、用途，并结合模式匹配给出示例。",
+      "answer": "Java 17 正式引入密封类，用于限制一个类或接口的继承。声明时使用 sealed 关键字，并通过 permits 子句列出允许的子类。这样做可以让类作者明确控制子类型种类，确保类型层次封闭且可穷举，适合用于模式匹配。密封类的子类必须用 final、sealed 或 non-sealed 修饰，以声明自身是否可以继续继承或放开限制。例如，定义一个密封接口 Shape 并许可 Circle、Rectangle、Triangle 实现它，当使用 switch 表达式配合模式匹配时，编译器能够检查覆盖所有子类型，避免遗漏 case 分支。这一特性在领域建模和状态机设计中特别有用，可以避免不期待的扩展，提升类型安全性。在运行时，JVM 也会对密封关系进行验证，强制实现一致。开发者应当注意，密封类的所有许可子类必须位于同一模块或包内，否则会产生编译错误。这种约束使得类型体系更加严谨，有助于构建可预测的 API。密封类结合记录类、模式匹配能写出更简洁且安全的代码，减少 instanceof 级联判断的脆弱性，是 Java 向函数式与声明式编程演进的重要一步。",
+      "tags": [
+        "Java 17",
+        "Sealed Classes",
+        "模式匹配",
+        "类型安全"
+      ]
+    },
+    {
+      "id": "java-347",
+      "date": "2026-05-30",
+      "title": "虚拟线程（Virtual Threads）如何改变 Java 并发编程模型？",
+      "prompt": "请解释 Project Loom 中虚拟线程的设计思路，与传统平台线程的差异，以及在 I/O 密集型场景下的优势。",
+      "answer": "虚拟线程是 Project Loom 为 Java 引入的轻量级用户态线程，首次在 Java 21 作为正式特性推出。与传统操作系统线程不同，虚拟线程由 JVM 直接调度，几乎零成本创建和阻塞。一个虚拟线程阻塞在 I/O 操作时，底层的载体线程（平台线程）会被释放去执行其他虚拟线程，从而实现海量并发。传统线程池受限于操作系统线程的上下文切换和内存开销，通常只能维持几千个线程。虚拟线程则允许创建数百万个相同的并发单元，极大简化了“一个任务一个线程”的编程风格。开发者可以用同步、顺序的代码编写高并发逻辑，无需诉诸复杂的异步回调或反应式编程，代码可读性和可维护性大幅提升。对于 Web 服务器、数据库访问、消息队列等 I/O 密集型应用，虚拟线程能够保持高吞吐量的同时降低资源占用。不过，虚拟线程不适用于 CPU 密集型计算，因为调度还在平台线程上进行，纯粹的 CPU 密集任务会导致载体线程长时间繁忙。此外，对 synchronized 块和本地方法的使用需要额外注意，它们可能固定（pin）载体线程，从而阻碍其他虚拟线程的执行。总体而言，虚拟线程标志着 Java 并发模型从“池化 + 异步”向“无限可伸缩的同步”回归，让编写高并发服务器应用变得像编写单线程程序一样简单。",
+      "tags": [
+        "虚拟线程",
+        "Project Loom",
+        "并发编程",
+        "I/O密集型"
+      ]
+    },
+    {
+      "id": "java-348",
+      "date": "2026-05-30",
+      "title": "Spring Boot 3 中如何实现原生镜像（Native Image）并解决常见限制？",
+      "prompt": "请描述基于 GraalVM 构建 Spring Boot 3 原生镜像的步骤、AOT 编译的关键配置，以及反射、动态代理等限制的应对方法。",
+      "answer": "Spring Boot 3 通过 org.springframework.boot:spring-boot-maven-plugin 提供了对 GraalVM Native Image 的内置支持。构建原生镜像的第一步是添加 native-maven-plugin 插件，并在 application.properties 中声明 spring.aot.enabled=true。然后执行 mvn -Pnative native:compile，这会触发 Spring AOT 处理生成代理类、动态反射注册信息以及资源配置文件。AOT 编译前会分析应用程序上下文，提取需要事先初始化的 Bean 和方法，生成 Native Image hint 文件。为应对反射、动态代理和资源加载的限制，Spring Native 提供了一个 tracing agent，开发者可以在 JVM 下运行应用时收集实际的反射、代理和资源访问信息，生成 metadata。也可以使用 @NativeHint 注解或 RuntimeHints API 主动注册。常见限制有：不能使用 JDK 动态代理（需转为 CGLIB 代理或使用接口代理），某些库未提供 GraalVM 配置需要手动补充；无法在运行时动态生成和加载类；类路径扫描必须能在构建期完成等。针对这些限制，应优先选择原生兼容的 Spring 组件，避免使用不支持的 JPA 实现如 Hibernate 6 之前版本需特别配置。完成编译后，原生镜像启动时间可压缩至毫秒级，内存占用减少 50% 以上，适合云原生微服务场景。但也要权衡构建时间变长和开发期不便等因素，建议通过 Spring Boot 的多层构建集成进行自动化。",
+      "tags": [
+        "Spring Boot 3",
+        "GraalVM",
+        "原生镜像",
+        "AOT编译"
+      ]
+    },
+    {
+      "id": "java-349",
+      "date": "2026-05-30",
+      "title": "如何使用 Record 类设计不可变数据载体并避免常见陷阱？",
+      "prompt": "请解释 Java Record 类的特性、编译器生成的组件访问器，以及使用中需要注意的可变字段、序列化和继承等问题。",
+      "answer": "Record 类是 Java 16 正式推出的不可变数据载体，用于简单值对象。声明 record 类型时，编译器会自动生成构造函数、equals、hashCode、toString 以及属性访问器方法。组件的访问器以字段名命名，没有 get 前缀。Record 类默认是不可变且 final 的，无法被继承，这确保了值语义的稳定性。在实际使用中需要特别注意，如果 Record 字段是可变对象（如 List、Date），虽然 Record 整体不可变，但通过访问器拿到的引用仍能修改内部状态，破坏不变性。解决方法是在构造函数中进行防御性复制，例如传入 List 时新建 ArrayList 并封装为不可变列表；同时访问器返回不可变视图或副本。序列化方面，Record 类遵守专门的序列化机制，通过相同的构造函数重建对象，这与传统类的 readObject 方法不同，安全性更高，能避免反序列化破坏不变量。Record 不能声明非静态字段，不能有显式的实例字段初始化器，也不能设计为抽象类或扩展其他类，但它可以实现接口。利用 Record 可以大幅减少样板代码，使 DTO、持久化投影、配置适配等场景的表达更加简洁。在与 JPA 或 JSON 序列化库集成时，需确认框架是否支持 Record，如 Jackson 2.12+ 可直接处理 Record 类型。总体而言，Record 推动开发者转向不变性优先的设计，减少状态共享带来的并发问题，是编写健壮系统的重要工具。",
+      "tags": [
+        "Record",
+        "不变性",
+        "序列化",
+        "Java 16"
+      ]
+    },
+    {
+      "id": "java-350",
+      "date": "2026-05-30",
+      "title": "在 Java 中实现自定义序列化时如何确保安全性并避免反序列化漏洞？",
+      "prompt": "请阐述 readObject/writeObject 的正确实现方式，以及如何使用 validateObject 和 ObjectInputFilter 防范攻击。",
+      "answer": "自定义序列化主要通过在类中定义 private void writeObject(ObjectOutputStream out) 和 private void readObject(ObjectInputStream in) 方法。在 writeObject 中可按需求写入额外域或进行加密，在 readObject 中必须按相同顺序读取并重新初始化对象。确保安全的第一原则是避免直接使用原始的 readObject 恢复对象，应当先使用 in.defaultReadObject() 恢复非瞬态字段，然后执行防御性复制和不变性检查，防止攻击者通过构造恶意流注入非法值。此外，可以实现 ObjectInputValidation 接口的 validateObject() 方法，在反序列化完成后校验对象完整性，一旦发现不合法状态应抛出 InvalidObjectException 阻断后续操作。Java 9 引入的 ObjectInputFilter 提供更强大的过滤机制，可以通过 setObjectInputFilter 为 ObjectInputStream 设置全局或流级过滤器，限制允许反序列化的类、深度和数组大小等属性，有效阻止反序列化炸弹攻击。例如，配置禁止多种危险包名的类，或限定最大数组长度。对于面向公网的应用，应通过命令行参数 jdk.serialFilter 或编码方式严格配置过滤器。另外，应尽可能用更安全的数据交换格式（如 JSON、Protobuf）替代 Java 原生序列化，或将序列化对象限制在内部信任域内。当必须使用序列化时，避免对敏感字段直接序列化，使用定制序列化方法进行掩饰或加密。良好的安全实践还包括避免序列化过大的对象图，以及不允许动态加载非预期类。综上所述，自定义序列化必须结合验证、过滤和防御性编程才能构建真正安全的反序列化机制。",
+      "tags": [
+        "序列化安全",
+        "ObjectInputFilter",
+        "readObject",
+        "反序列化漏洞"
+      ]
+    }
+  ]
+}
