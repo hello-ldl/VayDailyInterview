@@ -1,0 +1,69 @@
+{
+  "questions": [
+    {
+      "id": "java-341",
+      "date": "2026-05-31",
+      "title": "请解释 CompletableFuture 在 Java 中的核心用途，并对比它与传统 Future 的优势",
+      "prompt": "请结合异步任务编排、非阻塞回调以及异常处理等能力，具体说明 CompletableFuture 的设计思想，并给出典型使用场景。",
+      "answer": "CompletableFuture 是 Java 8 引入的异步编程核心工具，它不仅代表一个可能尚未完成的计算结果，更提供了强大的任务编排能力。与传统 Future 相比，它的最大突破在于支持非阻塞的回调、链式组合以及多任务协同。\n传统 Future 只能通过阻塞的 get() 方法获取结果，或者循环询问 isDone()，既不优雅也无法表达复杂的依赖关系。而 CompletableFuture 提供了 thenApply、thenAccept、thenCompose 等方法，允许在一个任务完成后自动触发下一个任务，整个过程无需阻塞主线程。例如，我们可以将两个远程服务调用组合起来：先异步查询用户信息，等结果返回后，再用用户ID异步查询订单列表，最后将两者合并返回。这样的链式调用使代码直观、易读，且线程资源得到高效利用。\n此外，CompletableFuture 内置了异常处理机制，通过 exceptionally 或 handle 方法可以集中处理异步流程中的错误，避免回调地狱。它还支持多个 Future 的合并（allOf、anyOf），实现并发调用与结果汇聚。在实际项目中，我们常将 CompletableFuture 与线程池结合，用于提升高并发接口的吞吐量，也是响应式编程的基础之一。",
+      "tags": [
+        "Java并发",
+        "CompletableFuture",
+        "异步编程",
+        "Future"
+      ]
+    },
+    {
+      "id": "java-342",
+      "date": "2026-05-31",
+      "title": "简述 HashMap 的工作原理，并深入说明 ConcurrentHashMap 在 JDK 1.8 中如何实现高并发安全",
+      "prompt": "要求描述 put 和 get 过程，以及 ConcurrentHashMap 在链表/红黑树、扩容和分段锁方面的演进，并与 Hashtable 做对比。",
+      "answer": "HashMap 基于数组+链表/红黑树结构，通过 key 的 hashCode 计算桶下标，发生哈希碰撞时用链表或红黑树存储。put 时，若当前位置为空则直接插入；若已有元素，则判断 key 是否相等，相等则覆盖，否则沿链表或树寻找并插入，当链表长度超过 8 且数组长度超过 64 时会转为红黑树以提高查找效率。get 过程则先定位桶，再遍历链表或树查找。JDK 1.8 之前的 HashMap 并发时可能产生死循环，因此非线程安全。\nConcurrentHashMap 在 JDK 1.8 放弃了分段锁，改用 CAS + synchronized 细粒度锁。每个桶的锁互不干扰，极大提升并发度。put 时，若桶为空，通过 CAS 尝试设置节点；若桶非空，则对该桶首节点加 synchronized 锁，再进行插入或更新。扩容支持多线程协作，通过 transferIndex 分配迁移区间，一个线程负责一段桶的迁移，减少阻塞。红黑树操作时，也通过锁根节点保证线程安全。\n相比之下，Hashtable 使用单一锁锁定整个表，并发性能极差。ConcurrentHashMap 还支持弱一致性的迭代，不会抛 ConcurrentModificationException。在高并发读写场景下，ConcurrentHashMap 是首选容器。",
+      "tags": [
+        "HashMap",
+        "ConcurrentHashMap",
+        "并发容器",
+        "JDK1.8"
+      ]
+    },
+    {
+      "id": "java-343",
+      "date": "2026-05-31",
+      "title": "详细说明 JVM 内存模型中堆和栈的区别，以及可能抛出的相关异常",
+      "prompt": "请从存储内容、线程共享性、生命周期、内存管理以及可能抛出的错误等角度进行对比，并解释如何通过参数调优。",
+      "answer": "JVM 内存模型中，栈和堆是两个完全不同的区域。栈是线程私有的，每个线程创建时会分配独立的虚拟机栈，用于存储方法调用的栈帧，包括局部变量表、操作数栈、动态链接等。局部变量表存放基本类型变量、对象引用，其生命周期随方法调用结束而自动释放，无需 GC 介入。当栈深度超过限制时会抛出 StackOverflowError；若无法扩容则会抛出 OutOfMemoryError。\n堆是所有线程共享的区域，用于存放几乎所有的对象实例和数组。堆是垃圾收集器管理的主要区域，分新生代和老年代，对象创建、消亡都在这里进行。当堆空间不足以分配新对象时，会触发 GC，如果回收后仍不足，则抛出 OutOfMemoryError: Java heap space。堆内存大小可通过 -Xms 和 -Xmx 调优。\n两者的根本差异决定了程序设计时的考量：栈的分配快、存取高效，但容量小且随线程创建而占用内存，过多的线程可能导致内存溢出；堆提供了大容量存储，但需合理设置大小以避免频繁 GC 或内存浪费。理解这两者有助于诊断内存泄露和性能问题，例如方法中大量创建大对象会快速填满堆，而深层递归调用会耗尽栈。",
+      "tags": [
+        "JVM",
+        "内存模型",
+        "堆和栈",
+        "OutOfMemoryError"
+      ]
+    },
+    {
+      "id": "java-344",
+      "date": "2026-05-31",
+      "title": "在 Spring 框架中，构造器注入和字段注入各有什么优缺点？并说明 Spring 如何解决单例作用域的循环依赖",
+      "prompt": "请从代码可测试性、不变性、依赖明确性、使用时机的便利性等方面对比，并解释 Spring 解决循环依赖的三级缓存机制。",
+      "answer": "构造器注入强制在对象创建时提供所有依赖，因此能保证依赖不为 null，且可以声明为 final，有利于构建不可变对象，同时依赖关系暴露在构造器签名中，让代码意图清晰、易于测试。缺点是无法解决循环依赖，因为构造器执行时对象还未完全初始化。字段注入（@Autowired 字段）写起来简便，但导致依赖隐藏，测试时需要反射注入或启动 Spring 容器，且容易产生 null 风险，不推荐在新项目中使用。\nSpring 解决单例作用域循环依赖的核心是三级缓存：singletonFactories（三级）、earlySingletonObjects（二级）、singletonObjects（一级）。当 A 创建时，先从一级缓存查找，没有则创建，并将其 ObjectFactory 提前暴露到三级缓存。A 的构造器执行后，发现依赖 B，于是去获取 B。B 同样进入三级缓存，然后发现依赖 A，此时从三级缓存拿到 A 的 ObjectFactory，调用其 getObject 获得 A 的早期引用（可能还未填充属性）并放入二级缓存，同时移除三级缓存。B 获得 A 引用后可继续初始化，最终放入一级缓存。A 再完成后续属性填充并移入一级缓存。这样互相依赖的两个单例 Bean 得以成功创建。该机制依赖构造器不涉及依赖，所以只适用于 setter 注入的场景，且要求 Bean 都是单例。",
+      "tags": [
+        "Spring",
+        "依赖注入",
+        "循环依赖",
+        "三级缓存"
+      ]
+    },
+    {
+      "id": "java-345",
+      "date": "2026-05-31",
+      "title": "请手写一个线程安全的懒汉式单例模式，并解释为什么 double-checked locking 模式需要使用 volatile 关键字",
+      "prompt": "要求提供完整代码实现，并深入分析指令重排导致的问题，以及 Java 内存模型中 happens-before 规则的保证。",
+      "answer": "常见的线程安全懒汉式单例采用双重检查锁定（DCL）模式，代码如下：\npublic class Singleton {\n    private static volatile Singleton instance;\n    private Singleton() {}\n    public static Singleton getInstance() {\n        if (instance == null) {\n            synchronized (Singleton.class) {\n                if (instance == null) {\n                    instance = new Singleton();\n                }\n            }\n        }\n        return instance;\n    }\n}\nvolatile 关键字在此不可或缺。new Singleton() 并非原子操作，可分解为三步：1. 分配内存空间；2. 初始化对象；3. 将 instance 引用指向内存地址。JIT 编译器可能出于优化将步骤 2 和 3 重排序，导致另一个线程在最外层的 if 判断时发现 instance 不为 null，但实际上对象还没有完成初始化，从而拿到一个不完整的对象，造成严重 bug。\n声明 volatile 后，根据 Java 内存模型的 happens-before 规则，对 volatile 变量的写操作先行发生于后续的读操作，并且禁止对该变量相关指令的重排序。因此，当第一个线程完成写操作后，第二个线程读到的 instance 一定是正确初始化的。DCL + volatile 实现了既高效又线程安全的单例，无需每次调用都进行同步，是种经典的权衡方案。",
+      "tags": [
+        "单例模式",
+        "volatile",
+        "双重检查锁定",
+        "线程安全"
+      ]
+    }
+  ]
+}
