@@ -14,6 +14,7 @@
 | `fix-answers.mjs` | 修复架构类占位答案 | 维护 |
 | `update-answers.mjs` | 精确匹配更新题目答案 | 维护 |
 | `update-answers-v2.mjs` | 关键词匹配更新题目答案 | 维护 |
+| `optimize-answers.mjs` | 通过指定 provider（deepseek / qianwen / openai）批量优化题目答案 | 维护 |
 
 ---
 
@@ -63,10 +64,14 @@ node scripts/generate-daily-question.mjs
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
-| `QUESTION_API_PROVIDER` | API 提供商 (`openai` / `deepseek`) | `openai` |
+| `QUESTION_API_PROVIDER` | API 提供商 (`openai` / `deepseek` / `qianwen`) | `openai` |
 | `OPENAI_API_KEY` | OpenAI API 密钥 | — |
 | `DEEPSEEK_API_KEY` | DeepSeek API 密钥 | — |
-| `DEEPSEEK_API_BASE` | DeepSeek API 基础地址 | `https://api.deepseek.com/anthropic` |
+| `DEEPSEEK_API_KEY` | DeepSeek API 密钥 | — |
+| `DEEPSEEK_API_BASE` | DeepSeek API 基础地址（或完整请求 URL） | `https://api.deepseek.com/anthropic` |
+| `QIANWEN_API_KEY` | 千问（Qianwen）API 密钥 | — |
+| `QIANWEN_API_BASE` | 千问兼容 OpenAI SDK 的请求基础地址 | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| `DEEPSEEK_API_URL` | DeepSeek 完整请求 URL，优先级高于 `DEEPSEEK_API_BASE` | — |
 | `QUESTION_DATE` | 生成日期 `YYYY-MM-DD` | 今天 |
 | `QUESTION_MODEL` | 模型名称 | `gpt-4o-mini` / `deepseek-v4-pro` |
 | `KAIYUAN_CLI` | （可选）外部相似度 CLI | — |
@@ -129,6 +134,31 @@ node scripts/update-answers-v2.mjs
 ```
 
 **覆盖领域**：JVM、并发、架构、数据库、网络、Spring 框架。
+
+---
+
+### 7. `optimize-answers.mjs` — 答案优化（支持 provider）
+
+通过指定 provider（`deepseek` / `qianwen` / `openai`）逐题优化题库中的现有答案。脚本会先根据题目标题提问一次，再根据补充说明提问一次，将两次得到的回答组合到 `answer` 字段中。
+
+```bash
+# 使用 Deepseek（默认）
+DEEPSEEK_API_KEY=sk-xxx \
+node scripts/optimize-answers.mjs
+
+# 或者指定 provider 为 qianwen
+QUESTION_API_PROVIDER=qianwen QIANWEN_API_KEY=sk-xxx \
+node scripts/optimize-answers.mjs
+```
+
+**可选环境变量**：
+- `QUESTION_DATE`：只优化指定日期分片，例如 `2026-05-20`
+- `QUESTION_CHUNK_FILE`：只优化指定分片路径，例如 `chunks/2026-05-20.json`
+- `DEEPSEEK_API_BASE`：Deepseek API 基础地址，默认 `https://api.deepseek.com/anthropic`
+- `DEEPSEEK_MODEL`：Deepseek 模型名称，默认 `deepseek-v4-pro`
+- `QIANWEN_API_BASE`：千问兼容地址，默认 `https://dashscope.aliyuncs.com/compatible-mode/v1`
+- `QIANWEN_MODEL`：千问模型名称，默认 `qianwen`
+- `INTERVIEWER_PROMPT`：覆盖默认面试官提示词
 
 ---
 

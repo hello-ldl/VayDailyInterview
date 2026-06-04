@@ -97,6 +97,7 @@ npm run preview
 - 如果使用 OpenAI，设置 `OPENAI_API_KEY`
 - 如果改用 Deepseek，设置：`QUESTION_API_PROVIDER=deepseek` 和 `DEEPSEEK_API_KEY`
   - 默认 `DEEPSEEK_API_BASE=https://api.deepseek.com/anthropic`
+  - 可选 `DEEPSEEK_API_URL` 覆盖完整请求 URL
   - 默认 `QUESTION_MODEL=deepseek-v4-pro`
 - 答案要求：清晰分段、段落分明、格式美观
 - 可选参数：`QUESTION_DATE=YYYY-MM-DD` 用于生成指定日期题目

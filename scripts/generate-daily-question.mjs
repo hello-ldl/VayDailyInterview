@@ -25,7 +25,7 @@
  *   QUESTION_API_PROVIDER    - API 提供商：'openai' 或 'deepseek'（默认 openai）
  *   OPENAI_API_KEY           - OpenAI API 密钥
  *   DEEPSEEK_API_KEY         - DeepSeek API 密钥
- *   DEEPSEEK_API_BASE        - DeepSeek API 基础地址（默认 https://api.deepseek.com/anthropic）
+ *   DEEPSEEK_API_BASE        - DeepSeek API 基础地址（默认 https://api.deepseek.com）
  *   QUESTION_DATE            - 生成题目的日期，格式 YYYY-MM-DD（默认今天）
  *   QUESTION_MODEL           - 使用的模型名称（默认 gpt-4o-mini / deepseek-v4-pro）
  *   KAIYUAN_CLI              - （可选）外部相似度计算 CLI 路径
@@ -37,6 +37,7 @@ import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
 import os from 'node:os'
 import { writeFileSync, mkdtempSync, rmSync } from 'node:fs'
+import { chatCompletion } from './provider-client.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.join(__dirname, '..')
@@ -48,22 +49,18 @@ const META_PATH = path.join(QUESTIONS_DIR, 'meta.json')
 const API_PROVIDER = (process.env.QUESTION_API_PROVIDER || 'openai').toLowerCase()
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY
-const DEEPSEEK_API_BASE = process.env.DEEPSEEK_API_BASE || 'https://api.deepseek.com/anthropic'
+const DEEPSEEK_API_BASE = process.env.DEEPSEEK_API_BASE || 'https://api.deepseek.com'
+const DEEPSEEK_API_URL = process.env.DEEPSEEK_API_URL || DEEPSEEK_API_BASE
+const QIANWEN_API_KEY = process.env.QIANWEN_API_KEY
+const QIANWEN_API_BASE = process.env.QIANWEN_API_BASE || 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+const QIANWEN_API_URL = process.env.QIANWEN_API_URL || QIANWEN_API_BASE
 const DATE = process.env.QUESTION_DATE || new Date().toISOString().slice(0, 10)
 const DEFAULT_OPENAI_MODEL = 'gpt-4o-mini'
 const DEFAULT_DEEPSEEK_MODEL = 'deepseek-v4-pro'
-const MODEL = process.env.QUESTION_MODEL || process.env.OPENAI_API_MODEL || (API_PROVIDER === 'deepseek' ? DEFAULT_DEEPSEEK_MODEL : DEFAULT_OPENAI_MODEL)
+const DEFAULT_QIANWEN_MODEL = 'qianwen'
+const MODEL = process.env.QUESTION_MODEL || process.env.OPENAI_API_MODEL || (API_PROVIDER === 'deepseek' ? DEFAULT_DEEPSEEK_MODEL : API_PROVIDER === 'qianwen' ? DEFAULT_QIANWEN_MODEL : DEFAULT_OPENAI_MODEL)
 
-// 验证 API 密钥
-if (API_PROVIDER === 'openai' && !OPENAI_API_KEY) {
-  console.error('ERROR: OPENAI_API_KEY is required for OpenAI provider')
-  process.exit(1)
-}
-
-if (API_PROVIDER === 'deepseek' && !DEEPSEEK_API_KEY) {
-  console.error('ERROR: DEEPSEEK_API_KEY is required for Deepseek provider')
-  process.exit(1)
-}
+// 模型 key 的校验由 `provider-client.mjs` 负责，脚本不关注具体实现。
 
 /** 带格式化的 JSON 序列化 */
 function jsonStringify(value) {
@@ -240,50 +237,50 @@ function parseJsonFromText(text) {
 async function fetchQuestionsFromModel(date) {
   const prompt = `请生成今天日期为 ${date} 的 5 道 Java 技术面试题目。返回一个 JSON 数组，数组中每个元素必须包含以下字段：\n- title（题目标题）\n- prompt（对题目的补充说明）\n- answer（不少于 120 字的详细标准答案）\n- tags（标签数组，最好包含 2 到 4 个相关标签）\n\n请只返回纯 JSON，不要附带 Markdown、注释或额外说明。\n\n答案部分请使用中文分段书写，段落分明、逻辑清晰，排版美观，每个段落保持句子紧凑且易读。
 `
-  const apiBase = API_PROVIDER === 'deepseek' ? DEEPSEEK_API_BASE : 'https://api.openai.com/v1'
-  const apiKey = API_PROVIDER === 'deepseek' ? DEEPSEEK_API_KEY : OPENAI_API_KEY
-  const url = `${apiBase.replace(/\/$/, '')}/chat/completions`
+  let apiResp
+  const messages = [
+    { role: 'system', content: 'You are a professional technical question generator.' },
+    { role: 'user', content: prompt },
+  ]
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: 'system', content: 'You are a professional technical question generator.' },
-        { role: 'user', content: prompt },
-      ],
-      temperature: 0.7,
-      max_tokens: 10000,
-    }),
+  const keyMap = {
+    openai: OPENAI_API_KEY,
+    deepseek: DEEPSEEK_API_KEY,
+    qianwen: QIANWEN_API_KEY,
+  }
+  const urlMap = {
+    openai: undefined,
+    deepseek: DEEPSEEK_API_URL,
+    qianwen: QIANWEN_API_URL,
+  }
+  const baseMap = {
+    deepseek: DEEPSEEK_API_BASE,
+    qianwen: QIANWEN_API_BASE,
+  }
+
+  const apiKeyParam = keyMap[API_PROVIDER]
+  const apiUrlParam = urlMap[API_PROVIDER]
+  const apiBaseParam = baseMap[API_PROVIDER]
+
+  apiResp = await chatCompletion({
+    provider: API_PROVIDER,
+    apiKey: apiKeyParam,
+    apiUrl: apiUrlParam,
+    apiBase: apiBaseParam,
+    model: MODEL,
+    messages,
+    temperature: 0.7,
+    max_tokens: 10000,
   })
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`${API_PROVIDER} request failed: ${response.status} ${response.statusText}\n${errorText}`)
-  }
-
-  // 读取响应体（仅一次）
-  const rawText = await response.text()
-
-  let body
   try {
-    body = JSON.parse(rawText)
-  } catch (err) {
-    throw new Error(`${API_PROVIDER} response JSON parse error: ${err.message}\nRaw body: ${rawText}`)
-  }
-
-  try {
-    console.log(`${API_PROVIDER} response received successfully. ${JSON.stringify({ id: body.id, model: body.model })}`)
+    console.log(`${API_PROVIDER} response received successfully. ${JSON.stringify({ id: apiResp?.id, model: apiResp?.model })}`)
   } catch {}
 
   // 提取 AI 返回的文本内容
-  const content = body.choices?.[0]?.message?.content || body.choices?.[0]?.text
+  const content = apiResp?.choices?.[0]?.message?.content || apiResp?.choices?.[0]?.text
   if (!content) {
-    throw new Error(`${API_PROVIDER} response did not contain a message content\nParsed body: ${JSON.stringify(body)}`)
+    throw new Error(`${API_PROVIDER} response did not contain a message content\nParsed body: ${JSON.stringify(apiResp)}`)
   }
 
   return parseJsonFromText(content)

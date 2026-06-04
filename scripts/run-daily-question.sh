@@ -81,8 +81,15 @@ if [[ "$QUESTION_API_PROVIDER" == "deepseek" ]]; then
     exit 1
   fi
   export DEEPSEEK_API_KEY
-  # 使用 v1 路径（而非默认的 /anthropic 路径）
-  export DEEPSEEK_API_BASE="https://api.deepseek.com/v1"
+  # 如果外部未设置，则提供默认 DEEPSEEK_API_BASE，允许用户通过环境覆盖以避免 404
+  export DEEPSEEK_API_BASE="${DEEPSEEK_API_BASE:-https://api.deepseek.com}"
+elif [[ "$QUESTION_API_PROVIDER" == "qianwen" ]]; then
+  if [[ -z "${QIANWEN_API_KEY:-}" ]]; then
+    echo "ERROR: QIANWEN_API_KEY is not set. Export it or provide via environment." >&2
+    exit 1
+  fi
+  export QIANWEN_API_KEY
+  export QIANWEN_API_BASE="${QIANWEN_API_BASE:-https://dashscope.aliyuncs.com/compatible-mode/v1}"
 else
   if [[ -z "${OPENAI_API_KEY:-}" ]]; then
     echo "ERROR: OPENAI_API_KEY is not set. Export it or provide via environment." >&2

@@ -7,11 +7,13 @@
     "dev": "vite",
     "gen:bank": "node scripts/emit-java-bank.mjs",
     "gen:daily": "node scripts/generate-daily-question.mjs",
+    "optimize:answers": "node scripts/optimize-answers.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "openai": "^6.41.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.15.0"

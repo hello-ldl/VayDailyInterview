@@ -3,25 +3,25 @@
   "chunkSize": 5,
   "totalQuestions": 370,
   "chunkCount": 74,
-  "latestDate": "2026-06-02",
+  "latestDate": "2026-06-03",
   "chunks": [
     {
-      "path": "chunks/2026-06-02.json",
+      "path": "chunks/2026-06-03.json",
       "count": 5,
       "cumulativeStart": 0
     },
     {
-      "path": "chunks/2026-06-01.json",
+      "path": "chunks/2026-06-02.json",
       "count": 5,
       "cumulativeStart": 5
     },
     {
-      "path": "chunks/2026-05-28.json",
+      "path": "chunks/2026-06-01.json",
       "count": 5,
       "cumulativeStart": 10
     },
     {
-      "path": "chunks/2026-05-29.json",
+      "path": "chunks/2026-05-31.json",
       "count": 5,
       "cumulativeStart": 15
     },
@@ -31,12 +31,12 @@
       "cumulativeStart": 20
     },
     {
-      "path": "chunks/2026-05-31.json",
+      "path": "chunks/2026-05-29.json",
       "count": 5,
       "cumulativeStart": 25
     },
     {
-      "path": "chunks/2026-06-03.json",
+      "path": "chunks/2026-05-28.json",
       "count": 5,
       "cumulativeStart": 30
     },
