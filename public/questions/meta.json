@@ -1,7 +1,7 @@
 {
   "version": 1,
   "chunkSize": 5,
-  "totalQuestions": 375,
+  "totalQuestions": 355,
   "chunkCount": 75,
   "latestDate": "2026-06-04",
   "chunks": [
@@ -42,343 +42,343 @@
     },
     {
       "path": "chunks/2026-05-28.json",
-      "count": 5,
+      "count": 4,
       "cumulativeStart": 35
     },
     {
       "path": "chunks/2026-05-27.json",
       "count": 5,
-      "cumulativeStart": 40
+      "cumulativeStart": 39
     },
     {
       "path": "chunks/2026-05-26.json",
       "count": 5,
-      "cumulativeStart": 45
+      "cumulativeStart": 44
     },
     {
       "path": "chunks/2026-05-25.json",
       "count": 5,
-      "cumulativeStart": 50
+      "cumulativeStart": 49
     },
     {
       "path": "chunks/2026-05-24.json",
       "count": 5,
-      "cumulativeStart": 55
+      "cumulativeStart": 54
     },
     {
       "path": "chunks/2026-05-23.json",
-      "count": 5,
-      "cumulativeStart": 60
+      "count": 4,
+      "cumulativeStart": 59
     },
     {
       "path": "chunks/2026-05-22.json",
-      "count": 5,
-      "cumulativeStart": 65
+      "count": 4,
+      "cumulativeStart": 63
     },
     {
       "path": "chunks/2026-05-21.json",
       "count": 5,
-      "cumulativeStart": 70
+      "cumulativeStart": 67
     },
     {
       "path": "chunks/2026-05-20.json",
       "count": 5,
-      "cumulativeStart": 75
+      "cumulativeStart": 72
     },
     {
       "path": "chunks/2026-05-19.json",
       "count": 5,
-      "cumulativeStart": 80
+      "cumulativeStart": 77
     },
     {
       "path": "chunks/2026-05-18.json",
       "count": 5,
-      "cumulativeStart": 85
+      "cumulativeStart": 82
     },
     {
       "path": "chunks/2026-05-17.json",
       "count": 5,
-      "cumulativeStart": 90
+      "cumulativeStart": 87
     },
     {
       "path": "chunks/2026-05-16.json",
       "count": 5,
-      "cumulativeStart": 95
+      "cumulativeStart": 92
     },
     {
       "path": "chunks/2026-05-15.json",
       "count": 5,
-      "cumulativeStart": 100
+      "cumulativeStart": 97
     },
     {
       "path": "chunks/2026-05-14.json",
       "count": 5,
-      "cumulativeStart": 105
+      "cumulativeStart": 102
     },
     {
       "path": "chunks/2026-05-13.json",
       "count": 5,
-      "cumulativeStart": 110
+      "cumulativeStart": 107
     },
     {
       "path": "chunks/2026-05-12.json",
       "count": 5,
-      "cumulativeStart": 115
+      "cumulativeStart": 112
     },
     {
       "path": "chunks/2026-05-11.json",
       "count": 5,
-      "cumulativeStart": 120
+      "cumulativeStart": 117
     },
     {
       "path": "chunks/2026-05-10.json",
       "count": 5,
-      "cumulativeStart": 125
+      "cumulativeStart": 122
     },
     {
       "path": "chunks/2026-05-09.json",
-      "count": 5,
-      "cumulativeStart": 130
+      "count": 4,
+      "cumulativeStart": 127
     },
     {
       "path": "chunks/2026-05-08.json",
       "count": 5,
-      "cumulativeStart": 135
+      "cumulativeStart": 131
     },
     {
       "path": "chunks/2026-05-07.json",
       "count": 5,
-      "cumulativeStart": 140
+      "cumulativeStart": 136
     },
     {
       "path": "chunks/2026-05-06.json",
       "count": 5,
-      "cumulativeStart": 145
+      "cumulativeStart": 141
     },
     {
       "path": "chunks/2026-05-05.json",
-      "count": 5,
-      "cumulativeStart": 150
+      "count": 4,
+      "cumulativeStart": 146
     },
     {
       "path": "chunks/2026-05-04.json",
       "count": 5,
-      "cumulativeStart": 155
+      "cumulativeStart": 150
     },
     {
       "path": "chunks/2026-05-03.json",
       "count": 5,
-      "cumulativeStart": 160
+      "cumulativeStart": 155
     },
     {
       "path": "chunks/2026-05-02.json",
       "count": 5,
-      "cumulativeStart": 165
+      "cumulativeStart": 160
     },
     {
       "path": "chunks/2026-05-01.json",
       "count": 5,
-      "cumulativeStart": 170
+      "cumulativeStart": 165
     },
     {
       "path": "chunks/2026-04-30.json",
       "count": 5,
-      "cumulativeStart": 175
+      "cumulativeStart": 170
     },
     {
       "path": "chunks/2026-04-29.json",
       "count": 5,
-      "cumulativeStart": 180
+      "cumulativeStart": 175
     },
     {
       "path": "chunks/2026-04-28.json",
       "count": 5,
-      "cumulativeStart": 185
+      "cumulativeStart": 180
     },
     {
       "path": "chunks/2026-04-27.json",
-      "count": 5,
-      "cumulativeStart": 190
+      "count": 4,
+      "cumulativeStart": 185
     },
     {
       "path": "chunks/2026-04-26.json",
       "count": 5,
-      "cumulativeStart": 195
+      "cumulativeStart": 189
     },
     {
       "path": "chunks/2026-04-25.json",
       "count": 5,
-      "cumulativeStart": 200
+      "cumulativeStart": 194
     },
     {
       "path": "chunks/2026-04-24.json",
       "count": 5,
-      "cumulativeStart": 205
+      "cumulativeStart": 199
     },
     {
       "path": "chunks/2026-04-23.json",
       "count": 5,
-      "cumulativeStart": 210
+      "cumulativeStart": 204
     },
     {
       "path": "chunks/2026-04-22.json",
       "count": 5,
-      "cumulativeStart": 215
+      "cumulativeStart": 209
     },
     {
       "path": "chunks/2026-04-21.json",
       "count": 5,
-      "cumulativeStart": 220
+      "cumulativeStart": 214
     },
     {
       "path": "chunks/2026-04-20.json",
-      "count": 5,
-      "cumulativeStart": 225
+      "count": 3,
+      "cumulativeStart": 219
     },
     {
       "path": "chunks/2026-04-19.json",
-      "count": 5,
-      "cumulativeStart": 230
+      "count": 1,
+      "cumulativeStart": 222
     },
     {
       "path": "chunks/2026-04-18.json",
       "count": 5,
-      "cumulativeStart": 235
+      "cumulativeStart": 223
     },
     {
       "path": "chunks/2026-04-17.json",
-      "count": 5,
-      "cumulativeStart": 240
+      "count": 2,
+      "cumulativeStart": 228
     },
     {
       "path": "chunks/2026-04-16.json",
       "count": 5,
-      "cumulativeStart": 245
+      "cumulativeStart": 230
     },
     {
       "path": "chunks/2026-04-15.json",
       "count": 5,
-      "cumulativeStart": 250
+      "cumulativeStart": 235
     },
     {
       "path": "chunks/2026-04-14.json",
       "count": 5,
-      "cumulativeStart": 255
+      "cumulativeStart": 240
     },
     {
       "path": "chunks/2026-04-13.json",
-      "count": 5,
-      "cumulativeStart": 260
+      "count": 3,
+      "cumulativeStart": 245
     },
     {
       "path": "chunks/2026-04-12.json",
-      "count": 5,
-      "cumulativeStart": 265
+      "count": 3,
+      "cumulativeStart": 248
     },
     {
       "path": "chunks/2026-04-11.json",
       "count": 5,
-      "cumulativeStart": 270
+      "cumulativeStart": 251
     },
     {
       "path": "chunks/2026-04-10.json",
       "count": 5,
-      "cumulativeStart": 275
+      "cumulativeStart": 256
     },
     {
       "path": "chunks/2026-04-09.json",
       "count": 5,
-      "cumulativeStart": 280
+      "cumulativeStart": 261
     },
     {
       "path": "chunks/2026-04-08.json",
       "count": 5,
-      "cumulativeStart": 285
+      "cumulativeStart": 266
     },
     {
       "path": "chunks/2026-04-07.json",
       "count": 5,
-      "cumulativeStart": 290
+      "cumulativeStart": 271
     },
     {
       "path": "chunks/2026-04-06.json",
       "count": 5,
-      "cumulativeStart": 295
+      "cumulativeStart": 276
     },
     {
       "path": "chunks/2026-04-05.json",
       "count": 5,
-      "cumulativeStart": 300
+      "cumulativeStart": 281
     },
     {
       "path": "chunks/2026-04-04.json",
       "count": 5,
-      "cumulativeStart": 305
+      "cumulativeStart": 286
     },
     {
       "path": "chunks/2026-04-03.json",
       "count": 5,
-      "cumulativeStart": 310
+      "cumulativeStart": 291
     },
     {
       "path": "chunks/2026-04-02.json",
       "count": 5,
-      "cumulativeStart": 315
+      "cumulativeStart": 296
     },
     {
       "path": "chunks/2026-04-01.json",
       "count": 5,
-      "cumulativeStart": 320
+      "cumulativeStart": 301
     },
     {
       "path": "chunks/2026-03-31.json",
       "count": 5,
-      "cumulativeStart": 325
+      "cumulativeStart": 306
     },
     {
       "path": "chunks/2026-03-30.json",
       "count": 5,
-      "cumulativeStart": 330
+      "cumulativeStart": 311
     },
     {
       "path": "chunks/2026-03-29.json",
       "count": 5,
-      "cumulativeStart": 335
+      "cumulativeStart": 316
     },
     {
       "path": "chunks/2026-03-28.json",
       "count": 5,
-      "cumulativeStart": 340
+      "cumulativeStart": 321
     },
     {
       "path": "chunks/2026-03-27.json",
-      "count": 5,
-      "cumulativeStart": 345
+      "count": 4,
+      "cumulativeStart": 326
     },
     {
       "path": "chunks/2026-03-26.json",
       "count": 5,
-      "cumulativeStart": 350
+      "cumulativeStart": 330
     },
     {
       "path": "chunks/2026-03-25.json",
       "count": 5,
-      "cumulativeStart": 355
+      "cumulativeStart": 335
     },
     {
       "path": "chunks/2026-03-24.json",
       "count": 5,
-      "cumulativeStart": 360
+      "cumulativeStart": 340
     },
     {
       "path": "chunks/2026-03-23.json",
       "count": 5,
-      "cumulativeStart": 365
+      "cumulativeStart": 345
     },
     {
       "path": "chunks/2026-03-22.json",
       "count": 5,
-      "cumulativeStart": 370
+      "cumulativeStart": 350
     }
   ]
 }
