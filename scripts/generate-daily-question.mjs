@@ -37,7 +37,8 @@ import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
 import os from 'node:os'
 import { writeFileSync, mkdtempSync, rmSync } from 'node:fs'
-import { chatCompletion } from './provider-client.mjs'
+import { chatCompletionText } from './provider-client.mjs'
+import { compare } from './similarity.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.join(__dirname, '..')
@@ -55,6 +56,8 @@ const QIANWEN_API_KEY = process.env.QIANWEN_API_KEY
 const QIANWEN_API_BASE = process.env.QIANWEN_API_BASE || 'https://dashscope.aliyuncs.com/compatible-mode/v1'
 const QIANWEN_API_URL = process.env.QIANWEN_API_URL || QIANWEN_API_BASE
 const DATE = process.env.QUESTION_DATE || new Date().toISOString().slice(0, 10)
+const THEME = process.env.QUESTION_THEME || ''
+// CLI override supported later
 const DEFAULT_OPENAI_MODEL = 'gpt-4o-mini'
 const DEFAULT_DEEPSEEK_MODEL = 'deepseek-v4-pro'
 const DEFAULT_QIANWEN_MODEL = 'qianwen'
@@ -234,9 +237,9 @@ function parseJsonFromText(text) {
  * @param {string} date - 日期字符串 YYYY-MM-DD
  * @returns {Promise<Array>} 生成的题目数组
  */
-async function fetchQuestionsFromModel(date) {
-  const prompt = `请生成今天日期为 ${date} 的 5 道 Java 技术面试题目。返回一个 JSON 数组，数组中每个元素必须包含以下字段：\n- title（题目标题）\n- prompt（对题目的补充说明）\n- answer（不少于 120 字的详细标准答案）\n- tags（标签数组，最好包含 2 到 4 个相关标签）\n\n请只返回纯 JSON，不要附带 Markdown、注释或额外说明。\n\n答案部分请使用中文分段书写，段落分明、逻辑清晰，排版美观，每个段落保持句子紧凑且易读。
-`
+async function fetchQuestionsFromModel(date, theme = '') {
+  const themeNote = theme ? `主题：${theme}\n\n` : ''
+  const prompt = `${themeNote}请生成今天日期为 ${date} 的 5 道 Java 技术面试题目。返回一个 JSON 数组，数组中每个元素必须包含以下字段：\n- title（题目标题）\n- prompt（对题目的补充说明）\n- answer（不少于 120 字的详细标准答案）\n- tags（标签数组，最好包含 2 到 4 个相关标签）\n\n请只返回纯 JSON，不要附带 Markdown、注释或额外说明。\n\n答案部分请使用中文分段书写，段落分明、逻辑清晰，排版美观，每个段落保持句子紧凑且易读.`
   let apiResp
   const messages = [
     { role: 'system', content: 'You are a professional technical question generator.' },
@@ -262,7 +265,7 @@ async function fetchQuestionsFromModel(date) {
   const apiUrlParam = urlMap[API_PROVIDER]
   const apiBaseParam = baseMap[API_PROVIDER]
 
-  apiResp = await chatCompletion({
+  const content = await chatCompletionText({
     provider: API_PROVIDER,
     apiKey: apiKeyParam,
     apiUrl: apiUrlParam,
@@ -273,16 +276,7 @@ async function fetchQuestionsFromModel(date) {
     max_tokens: 10000,
   })
 
-  try {
-    console.log(`${API_PROVIDER} response received successfully. ${JSON.stringify({ id: apiResp?.id, model: apiResp?.model })}`)
-  } catch {}
-
-  // 提取 AI 返回的文本内容
-  const content = apiResp?.choices?.[0]?.message?.content || apiResp?.choices?.[0]?.text
-  if (!content) {
-    throw new Error(`${API_PROVIDER} response did not contain a message content\nParsed body: ${JSON.stringify(apiResp)}`)
-  }
-
+  if (!content) throw new Error(`${API_PROVIDER} response did not contain a message content`)
   return parseJsonFromText(content)
 }
 
@@ -305,6 +299,17 @@ function buildQuestionId(totalQuestions, offset) {
  *   6. 自动 git 提交并推送
  */
 async function run() {
+  // parse simple CLI args
+  const cliArgs = process.argv.slice(2)
+  let noPush = false
+  let dryRun = false
+  let themeFromCli = ''
+  for (const a of cliArgs) {
+    if (a === '--no-push') noPush = true
+    if (a === '--dry-run') dryRun = true
+    if (a.startsWith('--theme=')) themeFromCli = a.split('=')[1]
+  }
+  const theme = themeFromCli || THEME
   const metaRaw = await fs.readFile(META_PATH, 'utf8')
   const meta = JSON.parse(metaRaw)
   const chunkFileName = `${DATE}.json`
@@ -318,8 +323,8 @@ async function run() {
 
   console.log(`Generating 5 Java interview questions for ${DATE}...`)
 
-  // 加载已有题目的完整文本用于相似度比对
-  const existingCombined = []
+  // 加载已有题目的完整文本用于相似度比对（仅 title）
+  const existingTitles = []
   for (const c of meta.chunks || []) {
     try {
       const p = path.join(QUESTIONS_DIR, c.path)
@@ -327,7 +332,7 @@ async function run() {
         const data = JSON.parse(await fs.readFile(p, 'utf8'))
         if (Array.isArray(data.questions)) {
           for (const q of data.questions) {
-            existingCombined.push(((q.title || '') + '\n' + (q.prompt || '') + '\n' + (q.answer || '')).trim())
+            existingTitles.push((q.title || '').trim())
           }
         }
       }
@@ -344,26 +349,23 @@ async function run() {
   // 循环调用 API 直到凑够 5 道不重复的题目
   while (uniqueItems.length < desiredCount && attempts < maxAttempts) {
     attempts += 1
-    const rawItems = await fetchQuestionsFromModel(DATE)
+    const rawItems = await fetchQuestionsFromModel(DATE, theme)
     if (!Array.isArray(rawItems) || rawItems.length === 0) continue
 
     for (const item of rawItems) {
       if (!item || !item.title || !item.prompt || !item.answer) continue
-      const combined = ((item.title || '') + '\n' + (item.prompt || '') + '\n' + (item.answer || '')).trim()
-
-      // 与已有题目比对
+      const title = (item.title || '').trim()
+      // 与已有题目比对（仅 title，使用 cosine 相似度）
       let isDup = false
-      for (const ex of existingCombined) {
-        const sim = similarityPercent(combined, ex)
-        if (sim > 70) { isDup = true; break }
+      for (const exTitle of existingTitles) {
+        const sim = compare(title, exTitle).cosine
+        if (sim >= 0.7) { isDup = true; break }
       }
       if (isDup) continue
-
-      // 与本次已收集的题目比对
+      // 与本次已收集的题目比对（仅 title）
       for (const u of uniqueItems) {
-        const uCombined = ((u.title || '') + '\n' + (u.prompt || '') + '\n' + (u.answer || '')).trim()
-        const sim = similarityPercent(combined, uCombined)
-        if (sim > 70) { isDup = true; break }
+        const sim = compare(title, (u.title || '').trim()).cosine
+        if (sim >= 0.7) { isDup = true; break }
       }
       if (isDup) continue
 
@@ -393,6 +395,12 @@ async function run() {
     }
   })
 
+  if (dryRun) {
+    console.log('--- DRY RUN: 生成预览（未写入文件/未提交） ---')
+    console.log(JSON.stringify(questions, null, 2))
+    return
+  }
+
   // 写入新分片文件
   await fs.mkdir(CHUNKS_DIR, { recursive: true })
   await fs.writeFile(chunkPath, jsonStringify({ questions }), 'utf8')
@@ -415,17 +423,15 @@ async function run() {
 
   await fs.writeFile(META_PATH, jsonStringify(meta), 'utf8')
 
-  // 自动 git 提交并推送
+  // 自动 git 提交并推送（可通过 --no-push 跳过推送）
   const commitMessage = `chore: add daily java interview questions for ${DATE}`
-  execSync(`git add ${escapeShell(chunkPath)} ${escapeShell(META_PATH)}`, {
-    cwd: ROOT,
-    stdio: 'inherit',
-  })
-  execSync(
-    `git commit --author "Daily Question Bot <bot@vaydaily.top>" -m "${commitMessage}"`,
-    { cwd: ROOT, stdio: 'inherit' },
-  )
-  execSync('git push origin main', { cwd: ROOT, stdio: 'inherit' })
+  execSync(`git add ${escapeShell(chunkPath)} ${escapeShell(META_PATH)}`, { cwd: ROOT, stdio: 'inherit' })
+  execSync(`git commit --author "Daily Question Bot <bot@vaydaily.top>" -m "${commitMessage}"`, { cwd: ROOT, stdio: 'inherit' })
+  if (!noPush) {
+    execSync('git push origin main', { cwd: ROOT, stdio: 'inherit' })
+  } else {
+    console.log('--no-push 设置，跳过 git push')
+  }
 
   console.log('Generated question chunk and pushed to Git successfully.')
 }
