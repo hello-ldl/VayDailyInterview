@@ -1,4 +1,5 @@
 import { useId, useMemo, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import type { InterviewQuestion } from '../types/question'
 
 type Props = {
@@ -19,6 +20,53 @@ function clampTags(tags: string[] | undefined, max = 5): string[] {
   return out
 }
 
+const markdownComponents = {
+  code({ className, children, ...props }: React.ComponentPropsWithoutRef<'code'> & { node?: unknown }) {
+    const isBlock = className?.startsWith('language-')
+    if (isBlock) {
+      return (
+        <pre className="md-code-block">
+          <code className={className} {...props}>
+            {children}
+          </code>
+        </pre>
+      )
+    }
+    return (
+      <code className="md-inline-code" {...props}>
+        {children}
+      </code>
+    )
+  },
+  pre({ children }: React.ComponentPropsWithoutRef<'pre'>) {
+    return <>{children}</>
+  },
+  h3({ children, ...props }: React.ComponentPropsWithoutRef<'h3'>) {
+    return <h3 className="md-h3" {...props}>{children}</h3>
+  },
+  h4({ children, ...props }: React.ComponentPropsWithoutRef<'h4'>) {
+    return <h4 className="md-h4" {...props}>{children}</h4>
+  },
+  ul({ children, ...props }: React.ComponentPropsWithoutRef<'ul'>) {
+    return <ul className="md-ul" {...props}>{children}</ul>
+  },
+  ol({ children, ...props }: React.ComponentPropsWithoutRef<'ol'>) {
+    return <ol className="md-ol" {...props}>{children}</ol>
+  },
+  li({ children, ...props }: React.ComponentPropsWithoutRef<'li'>) {
+    return <li className="md-li" {...props}>{children}</li>
+  },
+  p({ children, ...props }: React.ComponentPropsWithoutRef<'p'>) {
+    return <p className="md-p" {...props}>{children}</p>
+  },
+  strong({ children, ...props }: React.ComponentPropsWithoutRef<'strong'>) {
+    return <strong className="md-strong" {...props}>{children}</strong>
+  },
+  em({ children, ...props }: React.ComponentPropsWithoutRef<'em'>) {
+    return <em className="md-em" {...props}>{children}</em>
+  },
+}
+
 export function QuestionCard({ question }: Props) {
   const [open, setOpen] = useState(false)
   const bodyId = useId()
@@ -34,11 +82,13 @@ export function QuestionCard({ question }: Props) {
       <h2 id={`${bodyId}-title`} className="qcard__title">
         {question.title}
       </h2>
-      <div className="qcard__prompt">
-        {question.prompt.split('\n').map((line, i) => (
-          <p key={i}>{line || '\u00a0'}</p>
-        ))}
-      </div>
+      {question.prompt && (
+        <div className="qcard__prompt">
+          {question.prompt.split('\n').map((line, i) => (
+            <p key={i}>{line || '\u00a0'}</p>
+          ))}
+        </div>
+      )}
       <div className="qcard__actions">
         <button
           type="button"
@@ -57,9 +107,9 @@ export function QuestionCard({ question }: Props) {
           role="region"
           aria-label="参考答案"
         >
-          {question.answer.split('\n').map((line, i) => (
-            <p key={i}>{line || '\u00a0'}</p>
-          ))}
+          <ReactMarkdown components={markdownComponents}>
+            {question.answer}
+          </ReactMarkdown>
         </div>
       )}
       {tags.length > 0 && (

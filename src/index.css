@@ -377,19 +377,147 @@ button {
   color: var(--surface);
 }
 
+/* ── Answer / Markdown content ── */
+
 .qcard__answer {
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px dashed var(--line-strong);
   color: var(--text);
+  font-size: 0.9375rem;
+  line-height: 1.75;
 }
 
-.qcard__answer p {
-  margin: 0 0 0.5rem;
+/* Paragraph */
+.md-p {
+  margin: 0 0 1rem;
+  line-height: 1.78;
 }
-
-.qcard__answer p:last-child {
+.md-p:last-child {
   margin-bottom: 0;
+}
+
+/* Bold */
+.md-strong {
+  font-weight: 620;
+  color: #0a0a0a;
+  letter-spacing: -0.01em;
+}
+
+/* Italic / emphasis */
+.md-em {
+  font-style: italic;
+  color: #333;
+}
+
+/* Heading 3 */
+.md-h3 {
+  margin: 1.6rem 0 0.7rem;
+  font-size: 1.05rem;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+  color: #111;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--line);
+}
+.md-h3:first-child {
+  margin-top: 0;
+}
+
+/* Heading 4 */
+.md-h4 {
+  margin: 1.3rem 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #1a1a1a;
+}
+.md-h4:first-child {
+  margin-top: 0;
+}
+
+/* Unordered list */
+.md-ul {
+  margin: 0.6rem 0 1rem;
+  padding-left: 1.35rem;
+  list-style: none;
+}
+.md-ul .md-li::before {
+  content: '—';
+  display: inline-block;
+  width: 1.1rem;
+  margin-left: -1.1rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+/* Ordered list */
+.md-ol {
+  margin: 0.6rem 0 1rem;
+  padding-left: 1.5rem;
+  list-style: decimal;
+}
+.md-ol .md-li::marker {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* List item */
+.md-li {
+  margin-bottom: 0.35rem;
+  line-height: 1.7;
+}
+.md-li:last-child {
+  margin-bottom: 0;
+}
+.md-li .md-p {
+  margin: 0;
+}
+
+/* Inline code */
+.md-inline-code {
+  display: inline;
+  padding: 0.15em 0.45em;
+  margin: 0 0.1em;
+  font-family: var(--mono);
+  font-size: 0.85em;
+  background: #f3f3f3;
+  border: 1px solid #e2e2e2;
+  border-radius: 3px;
+  color: #c7254e;
+  word-break: break-word;
+}
+
+/* Code block */
+.md-code-block {
+  margin: 1rem 0;
+  padding: 1rem 1.15rem;
+  background: #1e1e1e;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: #d4d4d4;
+  border: 1px solid #2d2d2d;
+}
+.md-code-block code {
+  all: unset;
+  display: block;
+  white-space: pre;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Nested lists */
+.md-ul .md-ul,
+.md-ol .md-ol,
+.md-ul .md-ol,
+.md-ol .md-ul {
+  margin-top: 0.3rem;
+  margin-bottom: 0.3rem;
 }
 
 .practice-panel__bar {
